@@ -1,7 +1,7 @@
 // file=""UIController.cs" company=""
 // Copyright (c) 2021 All Rights Reserved
 // Author: Leandro Almeida
-// Date: 22/09/2021
+// Date: 05/10/2021
 
 #region usings
 using Game.Controller.Settings;
@@ -33,9 +33,6 @@ namespace Game.Controller.UI
         [Tooltip("Lose panel reference")]
         private GameObject losePanel;
         [SerializeField]
-        [Tooltip("Win panel reference")]
-        private GameObject winPanel;
-        [SerializeField]
         [Tooltip("Settings panel in Game reference")]
         private GameObject gameSettingsPanel;
         [SerializeField]
@@ -63,6 +60,9 @@ namespace Game.Controller.UI
         [Tooltip("Vibration button object, in settings, reference")]
         private GameObject vibraGO;
         [SerializeField]
+        [Tooltip("Settings button object reference")]
+        private GameObject settingsBtt;
+        [SerializeField]
         [Tooltip("Player object, reference")]
         private GameObject player;
         #endregion variables
@@ -71,15 +71,7 @@ namespace Game.Controller.UI
         private void Awake()
         {
             SettingPanelInit();
-            StartBackgroundMusic();
-
-            for (int i = 0; i < menuUIObject.transform.childCount; i++)
-            {
-                if (i <= 1)
-                    menuUIObject.transform.GetChild(i).gameObject.SetActive(true);
-                else
-                    menuUIObject.transform.GetChild(i).gameObject.SetActive(false);
-            }
+            MenuLayoutInit();
             gameUIObject.SetActive(false);
         }
         #endregion base methods
@@ -143,24 +135,6 @@ namespace Game.Controller.UI
         }
         #endregion SETTINGS
 
-        #region LEVEL
-        /// <summary>
-        /// Load level by ID
-        /// </summary>
-        /// <param name="a_level">Level ID</param>
-        public void OnLoadLevelClick(int a_level)
-        {
-            MenuController.settingsController.currentLevel = a_level;
-            menuUIObject.SetActive(false);
-            gameUIObject.SetActive(true);
-            gameCamera.gameObject.SetActive(true);
-            uiCamera.clearFlags = CameraClearFlags.Depth;
-
-            GameUILayoutInit();
-            GetComponent<GameController>().InitLevel();
-        }
-        #endregion LEVEL
-
         #region SHOP
         /// <summary>
         /// Buy and save option of materials
@@ -222,6 +196,14 @@ namespace Game.Controller.UI
         #endregion SHOP
 
         #region GAME
+        public void OnGameEnterMenu()
+        {
+            gameCamera.gameObject.SetActive(true);
+            uiCamera.clearFlags = CameraClearFlags.Depth;
+
+            GameUILayoutInit();
+        }
+
         /// <summary>
         /// Restart current level
         /// </summary>
@@ -260,37 +242,17 @@ namespace Game.Controller.UI
         }
 
         /// <summary>
-        /// Go to next level
-        /// </summary>
-        public void OnNextClick()
-        {
-            Menu.MenuController.settingsController.currentLevel++;
-            GameUILayoutInit();
-            GetComponent<GameController>().InitLevel();
-        }
-
-        /// <summary>
         /// Go to menu
         /// </summary>
         public void OnMenuClick()
         {
             // Back to Menu
-            GetComponent<MenuController>().LevelsInit();
-            GetComponent<MenuController>().menuUIObject.SetActive(true);
-            gameUIObject.SetActive(false);
-            GetComponent<MenuController>().gameCamera.gameObject.SetActive(false);
-            GetComponent<UIController>().uiCamera.clearFlags = CameraClearFlags.Skybox;
+            gameCamera.gameObject.SetActive(false);
+            uiCamera.clearFlags = CameraClearFlags.Skybox;
 
             UpdateUICoinsAmout();
 
-            for (int i = 0; i < GetComponent<Menu.MenuController>().menuUIObject.transform.childCount; i++)
-            {
-                if (i <= 1)
-                    GetComponent<MenuController>().menuUIObject.transform.GetChild(i).gameObject.SetActive(true);
-                else
-                    GetComponent<MenuController>().menuUIObject.transform.GetChild(i).gameObject.SetActive(false);
-            }
-            StartBackgroundMusic();
+            MenuLayoutInit();
         }
         #endregion GAME
 
@@ -354,16 +316,36 @@ namespace Game.Controller.UI
                 settingsPanel.transform.Find("Vibration").GetChild(0).GetComponent<Image>().sprite = Resources.Load("UI/vibrationOff", typeof(Sprite)) as Sprite;
         }
 
+        public void MenuLayoutInit()
+        {
+            for (int i = 0; i < menuUIObject.transform.childCount; i++)
+            {
+                if (i <= 1)
+                    menuUIObject.transform.GetChild(i).gameObject.SetActive(true);
+                else
+                    menuUIObject.transform.GetChild(i).gameObject.SetActive(false);
+            }
+            StartBackgroundMusic();
+        }
+
         public void GameUILayoutInit()
         {
             // UI start layout
             gamePlayBtt.SetActive(true);
             losePanel.SetActive(false);
-            winPanel.SetActive(false);
             gameSettingsPanel.SetActive(false);
         }
 
-    private IEnumerator ShopCoinsError()
+        /// <summary>
+        /// Open Lose panel when finish game
+        /// </summary>
+        public void LoseLevel()
+        {
+            losePanel.SetActive(true);
+            settingsBtt.SetActive(false);
+        }
+
+        private IEnumerator ShopCoinsError()
         {
             Color color = Color.red;
             while (color.g < 1.0f && color.b < 1.0f)

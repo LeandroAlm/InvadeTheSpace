@@ -1,7 +1,7 @@
 // file=""PlayerController.cs" company=""
 // Copyright (c) 2021 All Rights Reserved
 // Author: Leandro Almeida
-// Date: 19/09/2021
+// Date: 05/10/2021
 
 #region usings
 using Game.Controller.Game;
@@ -357,17 +357,9 @@ namespace Game.Controller.Player
         private void PlayerLose()
         {
             currentStatus = playerStatus.Finish;
-            gameControllerGO.GetComponent<GameController>().LoseLevel();
+            gameControllerGO.GetComponent<UI.UIController>().LoseLevel();
         }
 
-        public void PlayerFinish()
-        {
-            currentStatus = playerStatus.Finish;
-
-            // Animate end level
-            StartCoroutine("AnimateWinBox");
-        }
-        
         private void PlayAudioByName(string a_name, float a_volume)
         {
             if (MenuController.settingsController.soundTrigger == (int)Settings.SettingsController.settingsTrigger.Off)
@@ -441,47 +433,6 @@ namespace Game.Controller.Player
                 return tempGO.transform.GetChild(0);
             else
                 return null;
-        }
-
-        private IEnumerator AnimateWinBox()
-        {
-            int initialBoxes = boxesContainer.childCount;
-
-            guyTransform.GetComponent<Animator>().SetBool("isDancing", true);
-            guyTransform.Rotate(Vector3.up * -50);
-            MenuController.settingsController.Coins += coinsCollect;
-
-            yield return new WaitForSeconds(0.5f);
-
-            if (initialBoxes > 1)
-            {
-                extraGO.SetActive(true);
-                for (int i = 1; i < initialBoxes; i++)
-                {
-                    guyTransform.transform.localPosition += Vector3.down;
-                    Destroy(boxesContainer.GetChild(initialBoxes - i).gameObject);
-
-                    MenuController.settingsController.Coins += extraCoin;
-                    PlayAudioByName("coin", 0.5f);
-                    coinsTextGO.GetComponent<TextMeshProUGUI>().text = MenuController.settingsController.Coins.ToString();
-
-                    float angle = 0;
-                    while (angle < 180)
-                    {
-                        float extraSize = (Mathf.Sin(angle * Mathf.Deg2Rad) * 30);
-                        extraGO.GetComponent<TextMeshProUGUI>().fontSize = 70 + extraSize;
-
-                        angle += speed/2;
-
-                        yield return new WaitForEndOfFrame();
-                    }
-                }
-            }
-
-            yield return new WaitForSeconds(0.25f);
-
-            extraGO.SetActive(false);
-            gameControllerGO.GetComponent<GameController>().FinishLevel();
         }
         #endregion custom methods
     }

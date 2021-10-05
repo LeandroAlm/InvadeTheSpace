@@ -1,7 +1,7 @@
 // file=""GameController.cs" company=""
 // Copyright (c) 2021 All Rights Reserved
 // Author: Leandro Almeida
-// Date: 17/09/2021
+// Date: 05/10/2021
 
 #region usings
 using Game.Controller.Player;
@@ -26,9 +26,6 @@ namespace Game.Controller.Game
         [Tooltip("Settings button object reference")]
         private GameObject settingsBtt;
         [SerializeField]
-        [Tooltip("Win Panel object reference")]
-        private GameObject winPanel;
-        [SerializeField]
         [Tooltip("Lose Panel object reference")]
         private GameObject losePanel;
         #endregion vars
@@ -49,8 +46,6 @@ namespace Game.Controller.Game
 
             Material playersMat = Resources.Load<Material>("Materials/Mat_Box_" + Menu.MenuController.settingsController.currentBoxID);
             LevelLoader levelLoader = gameObject.AddComponent<LevelLoader>();
-            levelLoader.LoadLevel(Menu.MenuController.settingsController.currentLevel, playersMat);
-            Destroy(levelLoader);
 
             if (Menu.MenuController.settingsController.musicTrigger == (int)Settings.SettingsController.settingsTrigger.On)
             {
@@ -63,42 +58,6 @@ namespace Game.Controller.Game
 
             settingsBtt.SetActive(false);
             player.GetComponent<PlayerController>().PlayerInit(playersMat);
-        }
-
-        /// <summary>
-        /// Open Win panel
-        /// </summary>
-        public void FinishLevel()
-        {
-            var allLevels = Resources.LoadAll("Levels/", typeof(LevelDesign));
-
-            if (Menu.MenuController.settingsController.maxLevel + 1 <= allLevels.Length)
-            {
-                if (Menu.MenuController.settingsController.maxLevel <= Menu.MenuController.settingsController.currentLevel)
-                    Menu.MenuController.settingsController.maxLevel++;
-            }
-            else if(Menu.MenuController.settingsController.currentLevel == allLevels.Length)
-            {
-                winPanel.transform.Find("Next").gameObject.SetActive(false);
-                winPanel.transform.Find("Warning").gameObject.SetActive(true);
-            }
-            else
-            {
-                winPanel.transform.Find("Next").gameObject.SetActive(true);
-                winPanel.transform.Find("Warning").gameObject.SetActive(false);
-            }
-
-            settingsBtt.SetActive(false);
-            winPanel.SetActive(true);
-        }
-
-        /// <summary>
-        /// Open Lose panel
-        /// </summary>
-        public void LoseLevel()
-        {
-            losePanel.SetActive(true);
-            settingsBtt.SetActive(false);
         }
         
         public void DisableSettingsButton()

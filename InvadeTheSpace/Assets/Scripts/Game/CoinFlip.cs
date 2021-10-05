@@ -1,7 +1,7 @@
 // file=""CoinFlip.cs" company=""
 // Copyright (c) 2021 All Rights Reserved
 // Author: Leandro Almeida
-// Date: 20/09/2021
+// Date: 05/10/2021
 
 #region usings
 using UnityEngine;

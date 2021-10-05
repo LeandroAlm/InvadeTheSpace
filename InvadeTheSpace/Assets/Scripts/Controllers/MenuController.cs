@@ -1,7 +1,7 @@
 // file=""MenuController.cs" company=""
 // Copyright (c) 2021 All Rights Reserved
 // Author: Leandro Almeida
-// Date: 17/09/2021
+// Date: 05/10/2021
 
 #region usings
 using Game.Controller.Settings;
@@ -22,26 +22,20 @@ namespace Game.Controller.Menu
     {
         #region variables
         [SerializeField]
-        [Tooltip("Menu UI object reference")]
-        public GameObject menuUIObject;
-        [SerializeField]
         [Tooltip("3d Camera reference")]
-        public Camera gameCamera;
+        private Camera gameCamera;
         [SerializeField]
         [Tooltip("Coin text object reference")]
         public GameObject[] textCoin;
         [SerializeField]
-        [Tooltip("Levels container object reference")]
-        private GameObject levelContainerGO;
-        [SerializeField]
         [Tooltip("Shop container object reference")]
-        public GameObject shopContainerGO;
+        private GameObject shopContainerGO;
         [SerializeField]
         [Tooltip("Cost of new materials")]
         public int shopCost;
         [SerializeField]
         [Tooltip("Levels to start scrolling")]
-        public int scrollMinimum;
+        private int scrollMinimum;
         #endregion variables
 
         #region internal variables
@@ -64,12 +58,13 @@ namespace Game.Controller.Menu
         {
             gameCamera.gameObject.SetActive(false);
             SettingsInit();
-            LevelsInit();
             ShopLoad();
             foreach (GameObject cointText in textCoin)
             {
                 cointText.GetComponent<TextMeshProUGUI>().text = settingsController.Coins.ToString();
             }
+
+            GetComponent<UI.UIController>().enabled = true;
         }
         #endregion base methods
 
@@ -81,43 +76,6 @@ namespace Game.Controller.Menu
             settingsController.InitSettings();
         }
         #endregion SETTINGS
-
-        #region LEVELS
-        /// <summary>
-        /// Loads alm buttons for possible levels
-        /// </summary>
-        public void LevelsInit()
-        {
-            var allLevels = Resources.LoadAll("Levels/", typeof(LevelDesign));
-
-            GameObject LevelBtt = Resources.Load<GameObject>("Prefabs/UI/LevelBtt");
-            GameObject LevelBttBlock = Resources.Load<GameObject>("Prefabs/UI/LevelBttBlocked");
-
-            if (levelContainerGO.transform.childCount > 0)
-                foreach (Transform child in levelContainerGO.transform)
-                    Destroy(child.gameObject);
-
-            if (allLevels.Length >= scrollMinimum)
-                levelContainerGO.transform.parent.GetComponent<ScrollRect>().enabled = true;
-
-            for (int i = 1; i < allLevels.Length+1; i++)
-            {
-                GameObject levelBtt = null;
-
-                if (i <= settingsController.maxLevel)
-                    levelBtt = Instantiate(LevelBtt, levelContainerGO.transform) as GameObject;
-                else
-                    levelBtt = Instantiate(LevelBttBlock, levelContainerGO.transform) as GameObject;
-
-                levelBtt.name = "Btt_" + (i < 10 ? "0" : "") + i;
-                levelBtt.transform.GetComponentInChildren<TextMeshProUGUI>().text = (i < 10 ? "0" : "") + i;
-
-                // Need to create an int to fix i value, solved in stackOverflow
-                int i_value = i;
-                levelBtt.GetComponent<Button>()?.onClick.AddListener(delegate { GetComponent<UI.UIController>().OnLoadLevelClick(i_value); });
-            }
-        }
-        #endregion LEVELS
 
         #region SHOP
         /// <summary>
