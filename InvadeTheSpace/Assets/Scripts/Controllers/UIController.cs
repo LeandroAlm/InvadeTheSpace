@@ -37,9 +37,6 @@ namespace Game.Controller.UI
         [Tooltip("Shop coins object reference")]
         private GameObject shopCoinGO;
         [SerializeField]
-        [Tooltip("Shop buttons container object reference")]
-        private GameObject shopContainer;
-        [SerializeField]
         [Tooltip("3D camera reference")]
         private Camera gameCamera;
         [SerializeField]

@@ -5,6 +5,7 @@
 
 #region usings
 using Game.Controller.Menu;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 #endregion usings
@@ -26,9 +27,6 @@ namespace Game.Controller.Player
         [SerializeField]
         [Tooltip("Map object reference")]
         private GameObject mapGO;
-        [SerializeField]
-        [Tooltip("Forward speed")]
-        private float speed = 1.0f;
         [SerializeField]
         [Tooltip("Side speed")]
         private float speed_side = 1.0f;
@@ -57,86 +55,22 @@ namespace Game.Controller.Player
         /// </summary>
         private float currentLimitControl;
         /// <summary>
-        /// Player accelaration when move for sides
+        /// Flag to know if ship is moving
         /// </summary>
-        private float acceleration;
-        /// <summary>
-        /// Flag if touch is drag to right
-        /// </summary>
-        private bool isMovingRigth;
-        /// <summary>
-        /// Current direction of Player
-        /// </summary>
-        private Vector3 direction;
+        private bool isMoving;
         #endregion internal vars
 
         #region base methods
         private void Awake()
         {
-            SetCameraPostion();
+            PlayerInit();
         }
 
         private void Update()
         {
             if (currentStatus == playerStatus.Play)
             {
-                // Go forward
-                transform.position += transform.forward * speed * Time.deltaTime;
-
-                // Go sides
-                if (Input.touchCount > 0)
-                {
-                    Touch touch = Input.GetTouch(0);
-                    if (touch.phase == TouchPhase.Moved)
-                    {
-                        // Accelarate, reset on direction change, no easefunction, just Move_Linear to the 1.0f
-                        if (touch.deltaPosition.x > 0 && !isMovingRigth)
-                        {
-                            isMovingRigth = true;
-                            acceleration = 0.0f;
-                        }
-                        else if (touch.deltaPosition.x < 0 && isMovingRigth)
-                        {
-                            isMovingRigth = false;
-                            acceleration = 0.0f;
-                        }
-
-                        if (acceleration < 1)
-                            acceleration += Time.deltaTime * accelerationMultiplier;
-                        else
-                            acceleration = 1.0f;
-
-                        //if (currentLimitControl + (isMovingRigth ? 1 : -1) * speed_side * Time.deltaTime * acceleration <= 2
-                        //    && currentLimitControl + (isMovingRigth ? 1 : -1) * speed_side * Time.deltaTime * acceleration >= -2)
-                        if (currentLimitControl >= -2 && currentLimitControl <= 2)
-                        {
-                            float move = (isMovingRigth ? 1 : -1) * speed_side * Time.deltaTime * acceleration;
-                            float diff = move;
-
-                            // I case o limite reach
-                            if (currentLimitControl + move > 2)
-                            {
-                                diff = 2 - currentLimitControl;
-                                transform.position += transform.right * diff;
-                                currentLimitControl = 2;
-                            }
-                            else if(currentLimitControl + move < -2)
-                            {
-                                diff = -2 - currentLimitControl;
-                                transform.position += transform.right * diff;
-                                currentLimitControl = -2;
-                            }
-                            else
-                            {
-                                transform.position += transform.right * diff;
-                                currentLimitControl += diff;
-                            }
-
-                        }
-                    }
-                }
-                else
-                    acceleration = 0.0f;
+                PlayerMove();
             }
         }
 
@@ -145,26 +79,22 @@ namespace Game.Controller.Player
             if (collision.gameObject.CompareTag("Obstacle"))
             {
                 Debug.Log("Obstaclle");
+                PlayerLose();
             }
         }
         #endregion base methods
 
         #region custom methods
-        public void PlayerInit(Material a_material)
+        public void PlayerInit()
         {
             currentLimitControl = 0;
-            direction = Vector3.forward;
+            isMoving = false;
 
             transform.position = initialPosition;
             transform.rotation = Quaternion.Euler(Vector3.zero);
 
             coinsTextGO.GetComponent<TextMeshProUGUI>().text = MenuController.settingsController.Coins.ToString();
-
-            if (!GetComponent<Rigidbody>())
-            {
-                Rigidbody rb = gameObject.AddComponent<Rigidbody>();
-                rb.freezeRotation = true;
-            }
+            SetCameraPostion();
         }
         
         public void PlayerStart()
@@ -183,6 +113,58 @@ namespace Game.Controller.Player
             gameControllerGO.GetComponent<UI.UIController>().LoseLevel();
         }
         
+        private void PlayerMove()
+        {
+            // Go sides
+            if (!isMoving && Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+                if (touch.phase == TouchPhase.Moved )
+                {
+                    // Accelarate, reset on direction change, no easefunction, just Move_Linear to the 1.0f
+                    if (touch.deltaPosition.x > 0.0f)
+                        currentLimitControl++;
+                    else if (touch.deltaPosition.x < 0.0f)
+                        currentLimitControl--;
+                    else
+                        return;
+
+                    if (currentLimitControl >= -2 && currentLimitControl <= 2)
+                    {
+                        isMoving = true;
+                        StartCoroutine(PlayerMoveOverTime(touch.deltaPosition.x > 0 ? 1 : -1));
+                    }
+                    else
+                    {
+                        if (touch.deltaPosition.x > 0)
+                            currentLimitControl--;
+                        else if (touch.deltaPosition.x < 0)
+                            currentLimitControl++;
+                    }
+                }
+            }
+        }
+
+        private IEnumerator PlayerMoveOverTime(int a_direction)
+        {
+            float accelarate = 0.0f;
+            float destiny = transform.position.x + a_direction;
+
+            while ((a_direction < 0 && transform.position.x > destiny) || (a_direction > 0 && transform.position.x < destiny))
+            {
+                if (accelarate < 1.0f)
+                    accelarate += Time.deltaTime;
+
+                transform.position += (transform.right * a_direction) * speed_side * Time.deltaTime * accelarate;
+
+                yield return new WaitForEndOfFrame();
+            }
+
+            transform.position = new Vector3(destiny, transform.position.y, transform.position.z);
+
+            isMoving = false;
+        }
+
         public void SetCameraPostion(Vector3 ? a_pos = null)
         {
             cameraObject.transform.localPosition = a_pos ?? initialPositionCamera;
