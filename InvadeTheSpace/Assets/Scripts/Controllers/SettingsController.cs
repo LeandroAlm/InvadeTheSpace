@@ -70,7 +70,7 @@ namespace Game.Controller.Settings
         public int currentBoxID
         {
             get { return _BoxID; }
-            set 
+            set
             {
                 _BoxID = value;
                 PlayerPrefs.SetInt("BOX", _BoxID);
@@ -80,8 +80,8 @@ namespace Game.Controller.Settings
         public string currentShop
         {
             get { return _Shop; }
-            set 
-            { 
+            set
+            {
                 _Shop = value;
                 PlayerPrefs.SetString("SHOP", _Shop);
             }

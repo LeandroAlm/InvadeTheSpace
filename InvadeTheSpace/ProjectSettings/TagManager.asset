@@ -5,11 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Map
-  - BoxCollect
   - Coin
-  - MapLeft
-  - MapRight
-  - BoxLose
+  - Obstacle
   layers:
   - Default
   - TransparentFX

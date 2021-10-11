@@ -9,10 +9,8 @@ using Game.Controller.Menu;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Linq;
-using Game.Controller.Game;
-using Game.Controller.Player;
 using System.Collections;
+using Game.Controller.Player;
 #endregion usings
 
 namespace Game.Controller.UI
@@ -142,36 +140,36 @@ namespace Game.Controller.UI
         /// <param name="a_ID"></param>
         public void OnShopItemBuyClick(GameObject a_BttReference)
         {
-            string current_shop = MenuController.settingsController.currentShop;
+            //string current_shop = MenuController.settingsController.currentShop;
 
-            if (MenuController.settingsController.Coins - GetComponent<MenuController>().shopCost >= 0)
-            {
-                current_shop += a_BttReference.name + ";";
-                MenuController.settingsController.currentShop = current_shop;
+            //if (MenuController.settingsController.Coins - GetComponent<MenuController>().shopCost >= 0)
+            //{
+            //    current_shop += a_BttReference.name + ";";
+            //    MenuController.settingsController.currentShop = current_shop;
 
-                shopContainer.transform.Find(MenuController.settingsController.currentBoxID.ToString()).GetChild(0).gameObject.SetActive(false);
-                MenuController.settingsController.currentBoxID = int.Parse(a_BttReference.name);
+            //    shopContainer.transform.Find(MenuController.settingsController.currentBoxID.ToString()).GetChild(0).gameObject.SetActive(false);
+            //    MenuController.settingsController.currentBoxID = int.Parse(a_BttReference.name);
 
-                UpdateUICoinsAmout();
+            //    UpdateUICoinsAmout();
 
-                MenuController.settingsController.Coins -= GetComponent<MenuController>().shopCost;
-                foreach (GameObject cointText in GetComponent<MenuController>().textCoin)
-                {
-                    cointText.GetComponent<TextMeshProUGUI>().text = MenuController.settingsController.Coins.ToString();
-                }
+            //    MenuController.settingsController.Coins -= GetComponent<MenuController>().shopCost;
+            //    foreach (GameObject cointText in GetComponent<MenuController>().textCoin)
+            //    {
+            //        cointText.GetComponent<TextMeshProUGUI>().text = MenuController.settingsController.Coins.ToString();
+            //    }
 
-                a_BttReference.transform.GetChild(1).GetComponent<Image>().color = Color.white;
-                a_BttReference.transform.GetChild(1).GetComponent<Button>().onClick.RemoveAllListeners();
-                a_BttReference.transform.GetChild(1).GetComponent<Button>()?.onClick.AddListener(() => { GetComponent<UI.UIController>().OnShopItemChangeClick(a_BttReference); });
-                a_BttReference.transform.GetChild(1).GetChild(0).gameObject.SetActive(false);
+            //    a_BttReference.transform.GetChild(1).GetComponent<Image>().color = Color.white;
+            //    a_BttReference.transform.GetChild(1).GetComponent<Button>().onClick.RemoveAllListeners();
+            //    a_BttReference.transform.GetChild(1).GetComponent<Button>()?.onClick.AddListener(() => { GetComponent<UIController>().OnShopItemChangeClick(a_BttReference); });
+            //    a_BttReference.transform.GetChild(1).GetChild(0).gameObject.SetActive(false);
 
-                a_BttReference.transform.GetChild(0).gameObject.SetActive(true);
-            }
-            else
-            {
-                StopAllCoroutines();
-                StartCoroutine("ShopCoinsError");
-            }
+            //    a_BttReference.transform.GetChild(0).gameObject.SetActive(true);
+            //}
+            //else
+            //{
+            //    StopAllCoroutines();
+            //    StartCoroutine("ShopCoinsError");
+            //}
         }
 
         /// <summary>
@@ -180,18 +178,18 @@ namespace Game.Controller.UI
         /// <param name="a_ID"></param>
         public void OnShopItemChangeClick(GameObject a_BttReference)
         {
-            if (MenuController.settingsController.currentBoxID != int.Parse(a_BttReference.name))
-            {
-                string current_shop = MenuController.settingsController.currentShop;
-                string[] allMaterials = current_shop.Split(';');
+            //if (MenuController.settingsController.currentBoxID != int.Parse(a_BttReference.name))
+            //{
+            //    string current_shop = MenuController.settingsController.currentShop;
+            //    string[] allMaterials = current_shop.Split(';');
 
-                if (allMaterials.ToList().Contains(a_BttReference.name))
-                {
-                    shopContainer.transform.Find(MenuController.settingsController.currentBoxID.ToString()).GetChild(0).gameObject.SetActive(false);
-                    MenuController.settingsController.currentBoxID = int.Parse(a_BttReference.name);
-                    a_BttReference.transform.GetChild(0).gameObject.SetActive(true);
-                }
-            }
+            //    if (allMaterials.ToList().Contains(a_BttReference.name))
+            //    {
+            //        shopContainer.transform.Find(MenuController.settingsController.currentBoxID.ToString()).GetChild(0).gameObject.SetActive(false);
+            //        MenuController.settingsController.currentBoxID = int.Parse(a_BttReference.name);
+            //        a_BttReference.transform.GetChild(0).gameObject.SetActive(true);
+            //    }
+            //}
         }
         #endregion SHOP
 
@@ -210,7 +208,6 @@ namespace Game.Controller.UI
         public void OnRestartClick()
         {
             GameUILayoutInit();
-            GetComponent<GameController>().InitLevel();
         }
 
         /// <summary>

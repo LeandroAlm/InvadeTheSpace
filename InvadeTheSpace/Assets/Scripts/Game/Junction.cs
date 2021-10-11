@@ -5,10 +5,9 @@
 
 #region usings
 using UnityEngine;
-using static Game.Design.Level.LevelDesign;
 #endregion usings
 
-namespace Game.Design.Juntion
+namespace Game.Design.Junction
 {
     //[CreateAssetMenu(fileName = "LevelDesign", menuName = "ScriptableObjects/Junction")]
     [System.Serializable]
@@ -18,6 +17,19 @@ namespace Game.Design.Juntion
         public bool[] CoinsPosition;
         public int[] BlockWinPosition;
         public int[] BlockLosePosition;
+
+        public enum JunctionType
+        {
+            Straight,
+        }
+        public enum JunctionPositions
+        {
+            Left,
+            CenterLeft,
+            Center,
+            CenterRight,
+            Right,
+        }
 
         public void Init(JunctionType a_junctionType, bool[] a_CoinsPosition = null, int[] a_BlockWinPosition = null, int[] a_BlockLosePosition = null)
         {

@@ -57,16 +57,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Controllers\VibrationController.cs" />
-    <Compile Include="Assets\Scripts\Game\LevelLoader.cs" />
-    <Compile Include="Assets\Scripts\Game\LevelDesign.cs" />
-    <Compile Include="Assets\Scripts\Game\CoinFlip.cs" />
     <Compile Include="Assets\Scripts\Controllers\MenuController.cs" />
+    <Compile Include="Assets\_ImportedAssets\StarSparrow\Readme\Readme Files\Scripts\ReadmeStarSparrow.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
-    <Compile Include="Assets\Scripts\Controllers\SettingsController.cs" />
-    <Compile Include="Assets\Scripts\Game\BoxControlller.cs" />
     <Compile Include="Assets\Scripts\Game\Junction.cs" />
-    <Compile Include="Assets\Scripts\Game\GameController.cs" />
+    <Compile Include="Assets\Scripts\Controllers\GameController.cs" />
     <Compile Include="Assets\Scripts\Controllers\UIController.cs" />
+    <Compile Include="Assets\Scripts\Game\CoinFlip.cs" />
+    <Compile Include="Assets\Scripts\Game\JunctionLoader.cs" />
+    <Compile Include="Assets\Scripts\Controllers\teste.cs" />
+    <Compile Include="Assets\Scripts\Controllers\SettingsController.cs" />
   </ItemGroup>
   <ItemGroup>
      <None Include="Assets\_ImportedAssets\TextMesh Pro\Shaders\TMPro.cginc" />
@@ -75,6 +75,7 @@
      <None Include="Assets\_ImportedAssets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
      <None Include="Assets\_ImportedAssets\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />
      <None Include="Assets\_ImportedAssets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
+     <None Include="Assets\_ImportedAssets\StarSparrow\UpgradeHDRP\UpgradeHDRP.txt" />
      <None Include="Assets\_ImportedAssets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
      <None Include="Assets\Game\Materials\Skybox\Skybox Cubemap Blend.shader" />
      <None Include="Assets\_ImportedAssets\TextMesh Pro\Shaders\TMP_SDF-Surface.shader" />
