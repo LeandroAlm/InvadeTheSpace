@@ -46,14 +46,17 @@ namespace Game.Controller.UI
         [Tooltip("Play button reference")]
         private GameObject gamePlayBtt;
         [SerializeField]
+        [Tooltip("Shoot button reference")]
+        private GameObject gameShootBtt;
+        [SerializeField]
         [Tooltip("Sound button object, in settings, reference")]
-        private GameObject soundGO;
+        private GameObject menuSettingsSound;
         [SerializeField]
         [Tooltip("Music button object, in settings, reference")]
-        private GameObject musicGO;
+        private GameObject menuSettingsMusic;
         [SerializeField]
         [Tooltip("Vibration button object, in settings, reference")]
-        private GameObject vibraGO;
+        private GameObject menuSettingsVibra;
         [SerializeField]
         [Tooltip("Settings button object reference")]
         private GameObject settingsBtt;
@@ -80,12 +83,12 @@ namespace Game.Controller.UI
         {
             if (MenuController.settingsController.soundTrigger == (int)SettingsController.settingsTrigger.On)
             {
-                soundGO.GetComponent<Image>().sprite = Resources.Load("UI/soundOff", typeof(Sprite)) as Sprite;
+                menuSettingsSound.GetComponent<Image>().sprite = Resources.Load("UI/soundOff", typeof(Sprite)) as Sprite;
                 MenuController.settingsController.soundTrigger = (int)SettingsController.settingsTrigger.Off;
             }
             else
             {
-                soundGO.GetComponent<Image>().sprite = Resources.Load("UI/soundOn", typeof(Sprite)) as Sprite;
+                menuSettingsSound.GetComponent<Image>().sprite = Resources.Load("UI/soundOn", typeof(Sprite)) as Sprite;
                 MenuController.settingsController.soundTrigger = (int)SettingsController.settingsTrigger.On;
             }
 
@@ -101,12 +104,12 @@ namespace Game.Controller.UI
                 if (GetComponent<AudioSource>().isPlaying)
                     GetComponent<AudioSource>().Stop();
 
-                musicGO.GetComponent<Image>().sprite = Resources.Load("UI/soundOff", typeof(Sprite)) as Sprite;
+                menuSettingsMusic.GetComponent<Image>().sprite = Resources.Load("UI/soundOff", typeof(Sprite)) as Sprite;
                 MenuController.settingsController.musicTrigger = (int)SettingsController.settingsTrigger.Off;
             }
             else
             {
-                musicGO.GetComponent<Image>().sprite = Resources.Load("UI/soundOn", typeof(Sprite)) as Sprite;
+                menuSettingsMusic.GetComponent<Image>().sprite = Resources.Load("UI/soundOn", typeof(Sprite)) as Sprite;
                 MenuController.settingsController.musicTrigger = (int)SettingsController.settingsTrigger.On;
                 StartBackgroundMusic();
             }
@@ -119,12 +122,12 @@ namespace Game.Controller.UI
         {
             if (MenuController.settingsController.vibrationTrigger == (int)SettingsController.settingsTrigger.On)
             {
-                vibraGO.GetComponent<Image>().sprite = Resources.Load("UI/vibrationOff", typeof(Sprite)) as Sprite;
+                menuSettingsVibra.GetComponent<Image>().sprite = Resources.Load("UI/vibrationOff", typeof(Sprite)) as Sprite;
                 MenuController.settingsController.vibrationTrigger = (int)SettingsController.settingsTrigger.Off;
             }
             else
             {
-                vibraGO.GetComponent<Image>().sprite = Resources.Load("UI/vibrationOn", typeof(Sprite)) as Sprite;
+                menuSettingsVibra.GetComponent<Image>().sprite = Resources.Load("UI/vibrationOn", typeof(Sprite)) as Sprite;
                 MenuController.settingsController.vibrationTrigger = (int)SettingsController.settingsTrigger.On;
             }
         }
@@ -224,12 +227,14 @@ namespace Game.Controller.UI
             if (!gameSettingsPanel.activeSelf)
             {
                 gameSettingsPanel.SetActive(true);
+                gameShootBtt.SetActive(false);
                 player.GetComponent<PlayerController>().PlayerPause();
                 Time.timeScale = 0.0f;
             }
             else
             {
                 gameSettingsPanel.SetActive(false);
+                gameShootBtt.SetActive(true);
                 player.GetComponent<PlayerController>().PlayerStart();
                 Time.timeScale = 1.0f;
             }
@@ -247,6 +252,11 @@ namespace Game.Controller.UI
             UpdateUICoinsAmout();
 
             MenuLayoutInit();
+        }
+        
+        public void OnShootClick()
+        {
+            player.GetComponent<PlayerController>().PlayerShoot(gameShootBtt);
         }
         #endregion GAME
 

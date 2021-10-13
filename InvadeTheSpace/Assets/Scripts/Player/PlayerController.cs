@@ -46,6 +46,8 @@ namespace Game.Controller.Player
         {
             Play,
             Pause,
+            Move,
+            Shoot,
             Finish,
         }
         private playerStatus currentStatus = playerStatus.Pause;
@@ -54,15 +56,13 @@ namespace Game.Controller.Player
         /// Uses to update and limit max side position (keeping player inside of platform)
         /// </summary>
         private float currentLimitControl;
-        /// <summary>
-        /// Flag to know if ship is moving
-        /// </summary>
-        private bool isMoving;
+        private GameObject shipGO;
         #endregion internal vars
 
         #region base methods
         private void Awake()
         {
+            shipGO = transform.GetChild(0).gameObject;
             PlayerInit();
         }
 
@@ -88,7 +88,6 @@ namespace Game.Controller.Player
         public void PlayerInit()
         {
             currentLimitControl = 0;
-            isMoving = false;
 
             transform.position = initialPosition;
             transform.rotation = Quaternion.Euler(Vector3.zero);
@@ -116,10 +115,10 @@ namespace Game.Controller.Player
         private void PlayerMove()
         {
             // Go sides
-            if (!isMoving && Input.touchCount > 0)
+            if (currentStatus == playerStatus.Play && Input.touchCount > 0)
             {
                 Touch touch = Input.GetTouch(0);
-                if (touch.phase == TouchPhase.Moved )
+                if (touch.phase == TouchPhase.Moved && UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject == null)
                 {
                     // Accelarate, reset on direction change, no easefunction, just Move_Linear to the 1.0f
                     if (touch.deltaPosition.x > 0.0f)
@@ -131,8 +130,8 @@ namespace Game.Controller.Player
 
                     if (currentLimitControl >= -2 && currentLimitControl <= 2)
                     {
-                        isMoving = true;
-                        StartCoroutine(PlayerMoveOverTime(touch.deltaPosition.x > 0 ? 1 : -1));
+                        currentStatus = playerStatus.Move;
+                        StartCoroutine(PlayerMoveOverSpeed(touch.deltaPosition.x > 0 ? 1 : -1));
                     }
                     else
                     {
@@ -145,10 +144,58 @@ namespace Game.Controller.Player
             }
         }
 
-        private IEnumerator PlayerMoveOverTime(int a_direction)
+        public void PlayerShoot(GameObject a_ShootBtt)
+        {
+            if (currentStatus == playerStatus.Play)
+            {
+                currentStatus = playerStatus.Shoot;
+
+                // shoot animation
+                StartCoroutine(PlayerShootDelay(a_ShootBtt));
+            }
+        }
+
+        private IEnumerator PlayerShootDelay(GameObject a_ShootBtt)
+        {
+            float time = 0.0f;
+            TextMeshProUGUI textMeshPro = a_ShootBtt.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+            Color savedColor = textMeshPro.fontSharedMaterial.GetColor("_OutlineColor");
+
+            a_ShootBtt.SetActive(false);
+            textMeshPro.fontSharedMaterial.SetColor("_OutlineColor", Color.red);
+            a_ShootBtt.SetActive(true);
+
+            textMeshPro.outlineColor = new Color32(255, 0, 0, 255);
+            shipGO.GetComponent<Animator>().SetBool("shoot", true);
+
+            if (Physics.Raycast(new Vector3(transform.position.x, 0.5f, transform.position.z + 0.4f), Vector3.forward, out RaycastHit hit, 100))
+            {
+                if (hit.collider.CompareTag("Destructible"))
+                {
+                    hit.collider.GetComponent<Destructible.DestructibleController>().ApplyDamage(1);
+                }
+            }
+
+            while (time < 0.5)
+            {
+                time += Time.deltaTime;
+                yield return new WaitForEndOfFrame();
+            }
+
+            a_ShootBtt.SetActive(false);
+            textMeshPro.fontSharedMaterial.SetColor("_OutlineColor", savedColor);
+            a_ShootBtt.SetActive(true);
+
+            shipGO.GetComponent<Animator>().SetBool("shoot", false);
+            currentStatus = playerStatus.Play;
+        }
+
+        private IEnumerator PlayerMoveOverSpeed(int a_direction)
         {
             float accelarate = 0.0f;
             float destiny = transform.position.x + a_direction;
+
+            shipGO.GetComponent<Animator>().SetInteger("direction", a_direction);
 
             while ((a_direction < 0 && transform.position.x > destiny) || (a_direction > 0 && transform.position.x < destiny))
             {
@@ -162,7 +209,8 @@ namespace Game.Controller.Player
 
             transform.position = new Vector3(destiny, transform.position.y, transform.position.z);
 
-            isMoving = false;
+            shipGO.GetComponent<Animator>().SetInteger("direction", 0);
+            currentStatus = playerStatus.Play;
         }
 
         public void SetCameraPostion(Vector3 ? a_pos = null)

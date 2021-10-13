@@ -7,6 +7,7 @@ TagManager:
   - Map
   - Coin
   - Obstacle
+  - Destructible
   layers:
   - Default
   - TransparentFX
