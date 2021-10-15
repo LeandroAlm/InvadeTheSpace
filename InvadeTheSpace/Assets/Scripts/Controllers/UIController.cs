@@ -11,6 +11,8 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using Game.Controller.Player;
+using System.Collections.Generic;
+using System.Linq;
 #endregion usings
 
 namespace Game.Controller.UI
@@ -28,11 +30,8 @@ namespace Game.Controller.UI
         [Tooltip("Settings panel reference")]
         private GameObject settingsPanel;
         [SerializeField]
-        [Tooltip("Lose panel reference")]
-        private GameObject losePanel;
-        [SerializeField]
-        [Tooltip("Settings panel in Game reference")]
-        private GameObject gameSettingsPanel;
+        [Tooltip("Games panels poarent refence")]
+        private GameObject gamePanels;
         [SerializeField]
         [Tooltip("Shop coins object reference")]
         private GameObject shopCoinGO;
@@ -46,8 +45,11 @@ namespace Game.Controller.UI
         [Tooltip("Play button reference")]
         private GameObject gamePlayBtt;
         [SerializeField]
-        [Tooltip("Shoot button reference")]
-        private GameObject gameShootBtt;
+        [Tooltip("Top UI reference")]
+        private GameObject gameTopUI;
+        [SerializeField]
+        [Tooltip("Bottom UI reference")]
+        private GameObject gameBottomUI;
         [SerializeField]
         [Tooltip("Sound button object, in settings, reference")]
         private GameObject menuSettingsSound;
@@ -58,19 +60,66 @@ namespace Game.Controller.UI
         [Tooltip("Vibration button object, in settings, reference")]
         private GameObject menuSettingsVibra;
         [SerializeField]
-        [Tooltip("Settings button object reference")]
-        private GameObject settingsBtt;
-        [SerializeField]
         [Tooltip("Player object, reference")]
-        private GameObject player;
+        private PlayerController player;
+        [SerializeField]
+        [Tooltip("Game shoot button standard color")]
+        private Color32 shootStandardColor;
         #endregion variables
+
+        #region internal vars
+        /// <summary>
+        /// Shoot button reference
+        /// </summary>
+        private GameObject shootBtt;
+        /// <summary>
+        /// Bullet gameobject reference
+        /// </summary>
+        private List<GameObject> bulletsGO;
+        /// <summary>
+        /// Bullet text reference
+        /// </summary>
+        private TextMeshProUGUI bulletsText;
+        /// <summary>
+        /// Settings button object reference
+        /// </summary>
+        private GameObject settingsBtt;
+        /// <summary>
+        /// Lose panel reference
+        /// </summary>
+        private GameObject losePanel;
+        /// <summary>
+        /// Settings panel reference, in Game
+        /// </summary>
+        private GameObject gameSettingsPanel;
+        #endregion internal vars
 
         #region base methods
         private void Awake()
         {
             SettingPanelInit();
-            MenuLayoutInit();
-            gameUIObject.SetActive(false);
+            MenuUIInit();
+
+            // Game
+            // top
+            bulletsGO = new List<GameObject>();
+            for (int i = 0; i < gameTopUI.transform.GetChild(1).childCount - 1; i++)
+            {
+                bulletsGO.Add(gameTopUI.transform.GetChild(1).GetChild(i).gameObject);
+            }
+            bulletsText = gameTopUI.transform.GetChild(1).GetComponentInChildren<TextMeshProUGUI>();
+            settingsBtt = gameTopUI.transform.GetChild(2).gameObject;
+            // bottom
+            shootBtt = gameBottomUI.transform.GetChild(0).gameObject;
+            // panels
+            gameSettingsPanel = gamePanels.transform.GetChild(0).gameObject;
+            losePanel = gamePanels.transform.GetChild(1).gameObject;
+
+            shootBtt.SetActive(false);
+            shootBtt.transform.GetChild(0).GetComponent<TextMeshProUGUI>().fontSharedMaterial.SetColor("_OutlineColor", shootStandardColor);
+            shootBtt.SetActive(true);
+
+            GameUILayoutInit();
         }
         #endregion base methods
 
@@ -199,6 +248,8 @@ namespace Game.Controller.UI
             gameCamera.gameObject.SetActive(true);
             uiCamera.clearFlags = CameraClearFlags.Depth;
 
+            player.Init();
+
             GameUILayoutInit();
         }
 
@@ -208,6 +259,7 @@ namespace Game.Controller.UI
         public void OnRestartClick()
         {
             GameUILayoutInit();
+            player.Init();
         }
 
         /// <summary>
@@ -216,7 +268,7 @@ namespace Game.Controller.UI
         public void OnStartClick()
         {
             Time.timeScale = 1.0f;
-            player.GetComponent<PlayerController>().PlayerStart();
+            player.PlayerStart();
         }
 
         /// <summary>
@@ -227,15 +279,15 @@ namespace Game.Controller.UI
             if (!gameSettingsPanel.activeSelf)
             {
                 gameSettingsPanel.SetActive(true);
-                gameShootBtt.SetActive(false);
-                player.GetComponent<PlayerController>().PlayerPause();
+                gameBottomUI.SetActive(false);
+                player.PlayerPause();
                 Time.timeScale = 0.0f;
             }
             else
             {
                 gameSettingsPanel.SetActive(false);
-                gameShootBtt.SetActive(true);
-                player.GetComponent<PlayerController>().PlayerStart();
+                gameBottomUI.SetActive(true);
+                player.PlayerStart();
                 Time.timeScale = 1.0f;
             }
         }
@@ -250,13 +302,12 @@ namespace Game.Controller.UI
             uiCamera.clearFlags = CameraClearFlags.Skybox;
 
             UpdateUICoinsAmout();
-
-            MenuLayoutInit();
+            MenuUIInit();
         }
         
         public void OnShootClick()
         {
-            player.GetComponent<PlayerController>().PlayerShoot(gameShootBtt);
+            player.PlayerShoot(shootBtt);
         }
         #endregion GAME
 
@@ -320,7 +371,10 @@ namespace Game.Controller.UI
                 settingsPanel.transform.Find("Vibration").GetChild(0).GetComponent<Image>().sprite = Resources.Load("UI/vibrationOff", typeof(Sprite)) as Sprite;
         }
 
-        public void MenuLayoutInit()
+        /// <summary>
+        /// Menu UI starting
+        /// </summary>
+        public void MenuUIInit()
         {
             for (int i = 0; i < menuUIObject.transform.childCount; i++)
             {
@@ -330,14 +384,21 @@ namespace Game.Controller.UI
                     menuUIObject.transform.GetChild(i).gameObject.SetActive(false);
             }
             StartBackgroundMusic();
+            menuUIObject.SetActive(true);
+            gameUIObject.SetActive(false);
         }
 
+        /// <summary>
+        /// Game UI starting
+        /// </summary>
         public void GameUILayoutInit()
         {
             // UI start layout
             gamePlayBtt.SetActive(true);
             losePanel.SetActive(false);
             gameSettingsPanel.SetActive(false);
+            gameBottomUI.SetActive(false);
+            gameTopUI.SetActive(false);
         }
 
         /// <summary>
@@ -348,6 +409,41 @@ namespace Game.Controller.UI
             losePanel.SetActive(true);
             settingsBtt.SetActive(false);
         }
+
+        #region bullets
+        public void BulletsUpdate(int a_BulletAmount)
+        {
+            foreach (GameObject bullet in bulletsGO)
+            {
+                bullet.SetActive(true);
+                bullet.GetComponent<Image>().color = shootStandardColor;
+                shootBtt.GetComponent<Image>().color = shootStandardColor;
+                shootBtt.GetComponent<Button>().enabled = true;
+            }
+
+            shootBtt.SetActive(false);
+            shootBtt.transform.GetChild(0).GetComponent<TextMeshProUGUI>().fontSharedMaterial.SetColor("_OutlineColor", shootStandardColor);
+            shootBtt.SetActive(true);
+
+
+            if (a_BulletAmount <= 2)
+                bulletsGO[0].SetActive(false);
+            if (a_BulletAmount <= 1)
+                bulletsGO[1].SetActive(false);
+            if (a_BulletAmount <= 0)
+            {
+                bulletsGO[2].GetComponent<Image>().color = Color.red;
+                shootBtt.GetComponent<Image>().color = Color.red;
+                shootBtt.GetComponent<Button>().enabled = false;
+
+                shootBtt.SetActive(false);
+                shootBtt.transform.GetChild(0).GetComponent<TextMeshProUGUI>().fontSharedMaterial.SetColor("_OutlineColor", Color.red);
+                shootBtt.SetActive(true);
+            }
+
+            bulletsText.text = a_BulletAmount.ToString();
+        }
+        #endregion bullets
 
         private IEnumerator ShopCoinsError()
         {

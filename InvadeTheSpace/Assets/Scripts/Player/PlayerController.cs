@@ -4,7 +4,10 @@
 // Date: 05/10/2021
 
 #region usings
+using Game.Controller.Game;
 using Game.Controller.Menu;
+using Game.Controller.UI;
+using Game.Data.Ship;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -29,7 +32,7 @@ namespace Game.Controller.Player
         private GameObject mapGO;
         [SerializeField]
         [Tooltip("Side speed")]
-        private float speed_side = 1.0f;
+        private float startingSpeed;
         [SerializeField]
         [Tooltip("Acceleration multiplier for side move, when drag direction change Acceleration goes 0.0f - 1.0f with this multiplier. Created to smooth direction change")]
         private float accelerationMultiplier;
@@ -57,13 +60,15 @@ namespace Game.Controller.Player
         /// </summary>
         private float currentLimitControl;
         private GameObject shipGO;
+        private ShipData shipData;
         #endregion internal vars
 
         #region base methods
-        private void Awake()
+        private void Start()
         {
             shipGO = transform.GetChild(0).gameObject;
-            PlayerInit();
+            shipData = new ShipData(gameControllerGO.GetComponent<UIController>());
+            Init();
         }
 
         private void Update()
@@ -85,8 +90,9 @@ namespace Game.Controller.Player
         #endregion base methods
 
         #region custom methods
-        public void PlayerInit()
+        public void Init()
         {
+            shipData.ShipStartPlay(startingSpeed);
             currentLimitControl = 0;
 
             transform.position = initialPosition;
@@ -98,18 +104,18 @@ namespace Game.Controller.Player
         
         public void PlayerStart()
         {
-            currentStatus = playerStatus.Play;
+            SetPlayerStatus(playerStatus.Play);
         }
         
         public void PlayerPause()
         {
-            currentStatus = playerStatus.Pause;
+            SetPlayerStatus(playerStatus.Pause);
         }
 
         private void PlayerLose()
         {
-            currentStatus = playerStatus.Finish;
-            gameControllerGO.GetComponent<UI.UIController>().LoseLevel();
+            SetPlayerStatus(playerStatus.Finish);
+            gameControllerGO.GetComponent<UIController>().LoseLevel();
         }
         
         private void PlayerMove()
@@ -130,7 +136,7 @@ namespace Game.Controller.Player
 
                     if (currentLimitControl >= -2 && currentLimitControl <= 2)
                     {
-                        currentStatus = playerStatus.Move;
+                        SetPlayerStatus(playerStatus.Move);
                         StartCoroutine(PlayerMoveOverSpeed(touch.deltaPosition.x > 0 ? 1 : -1));
                     }
                     else
@@ -146,9 +152,10 @@ namespace Game.Controller.Player
 
         public void PlayerShoot(GameObject a_ShootBtt)
         {
-            if (currentStatus == playerStatus.Play)
+            if (currentStatus == playerStatus.Play && shipData.bullets > 0)
             {
-                currentStatus = playerStatus.Shoot;
+                SetPlayerStatus(currentStatus = playerStatus.Shoot);
+                shipData.bullets--;
 
                 // shoot animation
                 StartCoroutine(PlayerShootDelay(a_ShootBtt));
@@ -187,7 +194,7 @@ namespace Game.Controller.Player
             a_ShootBtt.SetActive(true);
 
             shipGO.GetComponent<Animator>().SetBool("shoot", false);
-            currentStatus = playerStatus.Play;
+            SetPlayerStatus(playerStatus.Play);
         }
 
         private IEnumerator PlayerMoveOverSpeed(int a_direction)
@@ -202,7 +209,7 @@ namespace Game.Controller.Player
                 if (accelarate < 1.0f)
                     accelarate += Time.deltaTime;
 
-                transform.position += (transform.right * a_direction) * speed_side * Time.deltaTime * accelarate;
+                transform.position += (transform.right * a_direction) * shipData.speed * Time.deltaTime * accelarate;
 
                 yield return new WaitForEndOfFrame();
             }
@@ -210,12 +217,22 @@ namespace Game.Controller.Player
             transform.position = new Vector3(destiny, transform.position.y, transform.position.z);
 
             shipGO.GetComponent<Animator>().SetInteger("direction", 0);
-            currentStatus = playerStatus.Play;
+            SetPlayerStatus(playerStatus.Play);
         }
 
         public void SetCameraPostion(Vector3 ? a_pos = null)
         {
             cameraObject.transform.localPosition = a_pos ?? initialPositionCamera;
+        }
+        
+        private void SetPlayerStatus(playerStatus a_PlayerStatus)
+        {
+            currentStatus = a_PlayerStatus;
+
+            if (currentStatus == playerStatus.Pause || currentStatus == playerStatus.Finish)
+                gameControllerGO.GetComponent<GameController>().OnPlayerStatusChange(false);
+            else
+                gameControllerGO.GetComponent<GameController>().OnPlayerStatusChange(true);
         }
         #endregion custom methods
     }
