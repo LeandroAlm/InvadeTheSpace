@@ -4,113 +4,174 @@
 // Date: 05/10/2021
 
 #region usings
-using Game.Design.Junction;
+using Game.Controller.Game;
+using Game.Data.Plataform;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 #endregion usings
 
-namespace Game.Loader.Junctions
+namespace Game.Loader.Plataform
 {
     public class JunctionLoader : MonoBehaviour
     {
         #region vars
-        public Vector3 currentPosition;
-        public Vector3 currentForward;
-        public int plataformsLoad;
+        private List<GameObject> allPlataforms;
+        private GameObject coinObject;
+
+        private GameController gameController;
+        private Transform mapParent;
+        private int plataformCount;
         #endregion vars
 
         #region methods
-        /// <summary>
-        /// Load Junction
-        /// </summary>
-        /// <param name="a_junction">junction top load</param>
-        /// <param name="a_mapParent">Map transform reference</param>
-        /// <param name="a_BoxMaterial">Material to add to boxes (in case junction have boxes)</param>
-        public void LoadAJunction(Junction a_junction, Transform a_mapParent, Material a_BoxMaterial)
+        internal void Init(GameController a_GameControllerRef)
         {
-            GameObject go = null;
+            var _allPlataforms = Resources.LoadAll("Map/Plataforms/", typeof(GameObject));
+            allPlataforms = new List<GameObject>();
 
-            if (a_junction.JuntionType == Junction.JunctionType.Straight)
-                go = Instantiate(Resources.Load<GameObject>("Prefabs/Game/Straight"));
+            foreach (Object plataform in _allPlataforms)
+                allPlataforms.Add(plataform as GameObject);
 
-            go.transform.position = currentPosition;
-            go.transform.forward = currentForward;
-            go.name = "Junction_" + plataformsLoad;
+            gameController = a_GameControllerRef;
+            mapParent = gameController.map.transform;
 
-            int x = -2;
-            int z = 1;
-            GameObject tempGO = null;
-            for (int i = 0; i < 15; i++)
+            coinObject = Resources.Load("Map/Collectables/Coin") as GameObject;
+        }
+
+        public void LoadPlaraform(Vector3 a_CurrentPosition, int a_forceDiff = 0, bool resetCount = false, bool a_IsInLastPostion = false, bool a_Collectables = true)
+        {
+            GameObject go = Instantiate(GetRandomPlataform(a_forceDiff));
+            Junction junction = go.GetComponent<Junction>();
+
+            go.GetComponent<PlataformController>().gameController = this.gameController;
+
+            if (resetCount)
+                plataformCount = 0;
+
+            if (a_IsInLastPostion)
+                go.transform.position = gameController.plataformLastPos;
+            else
+                go.transform.position = a_CurrentPosition;
+
+            go.name = "Junction_" + plataformCount.ToString();
+
+            if (a_Collectables)
             {
-                if (a_junction.BlockWinPosition != null && a_junction.BlockWinPosition.Length > 0 && a_junction.BlockWinPosition[i] > 0) // Boxes to pickup
+                if (Random.Range(1, 100) <= junction.probCoinRow)
                 {
-                    for (int j = 0; j < a_junction.BlockWinPosition[i]; j++)
+                    int rand_1 = Random.Range(1, 100);
+                    int loop = 1;
+                    int sume = 0;
+
+                    for (int i = 0; i < 5; i++)
                     {
-                        tempGO = Instantiate(Resources.Load<GameObject>("Prefabs/Game/Box"));
-                        tempGO.name = "Box_" + i;
-                        tempGO.transform.forward = currentForward;
-                        SetPositionByCurrentForward(go.transform, tempGO.transform, x, z, 0.6f + j * 1);
-                        tempGO.transform.parent = a_mapParent;
-                        tempGO.GetComponent<Renderer>().material = a_BoxMaterial;
+                        sume += junction.probCoinsEachRow[i];
+                        if (rand_1 <= sume)
+                        {
+                            loop = i + 1;
+                            break;
+                        }
                     }
+
+                    InstanciateObejectsInRow(junction, go.transform.position, loop, coinObject);
                 }
-                else if ((i >= 5 && i <= 9)
-                    && a_junction.BlockLosePosition != null && a_junction.BlockLosePosition.Length > 0 && a_junction.BlockLosePosition[i - 5] > 0) // Boxes to lose
+                else
                 {
-                    for (int j = 0; j < a_junction.BlockLosePosition[i - 5]; j++)
-                    {
-                        tempGO = Instantiate(Resources.Load<GameObject>("Prefabs/Game/BoxLose"));
-                        tempGO.name = "BoxLose_" + i;
-                        tempGO.transform.forward = currentForward;
-                        SetPositionByCurrentForward(go.transform, tempGO.transform, x, z, 0.6f + j * 1);
-                        tempGO.transform.parent = a_mapParent;
-                    }
+                    for (int x = 0; x < 5; x++)
+                        for (int y = 0; y < 3; y++)
+                        {
+                            if (junction.coinsPosition[(x + y * 5)])
+                            {
+                                if (Random.Range(1, 100) <= junction.probSingleCoin)
+                                    InstanciateAnObject(coinObject, go.transform.position + new Vector3(x-2, 0.5f, y-1));
+                            }
+                        }
                 }
-                else if (a_junction.CoinsPosition != null && a_junction.CoinsPosition.Length > 0 && a_junction.CoinsPosition[i]) // Coins
+            }
+            
+            go.transform.parent = mapParent;
+            plataformCount++;
+        }
+
+        private void InstanciateObejectsInRow(Junction a_junction, Vector3 a_MiddlePos, int a_RowsAmout, GameObject a_Object)
+        {
+            int[] rowsPos = new int[5];
+            int[] rows = new int[5];
+            int rowsCount = 0;
+
+            for (int i = 0; i < 5; i++)
+            {
+                int count = 0;
+                for (int j = 0; j < 3; j++)
                 {
-                    tempGO = Instantiate(Resources.Load<GameObject>("Prefabs/Game/Coin"));
-                    tempGO.name = "Coin_" + i;
-                    tempGO.transform.forward = currentForward;
-                    tempGO.transform.rotation = Quaternion.Euler(new Vector3(-90, 0, 0));
-                    SetPositionByCurrentForward(go.transform, tempGO.transform, x, z, 0.8f);
-                    tempGO.transform.parent = a_mapParent;
+                    if (a_junction.coinsPosition[i + j * 5])
+                        count++;
+                }
+                if (count >= 3)
+                {
+                    rows[rowsCount] = i;
+                    rowsCount++;
                 }
 
-                x++;
-
-                if ((i + 1) % 5 == 0)
-                    z--;
-                if (x >= 3)
-                    x = -2;
             }
 
-            go.transform.parent = a_mapParent;
+            if (a_RowsAmout > rowsCount)
+                a_RowsAmout = rowsCount;
 
-            currentPosition += currentForward * 3;
-            plataformsLoad++;
+            for (int i = 0; i < a_RowsAmout; i++)
+            {
+                int rand = Random.Range(0, rowsCount - 1);
+
+                for (int j = -1; j < 2; j++)
+                    InstanciateAnObject(a_Object, a_MiddlePos + new Vector3(rowsPos[rand] - 2, 0.5f, j));
+
+                rowsCount--;
+                if (rowsCount < 0)
+                    break;
+            }
         }
 
         /// <summary>
-        /// Set postion by rotation of current Junction
+        /// Instanciate single object
         /// </summary>
-        /// <param name="a_reference">Junction to be reference of positions</param>
-        /// <param name="a_transform">Transform that will be set position</param>
-        /// <param name="a_right">postion gap to right</param>
-        /// <param name="a_forward">postion gap to forward</param>
-        private void SetPositionByCurrentForward(Transform a_reference, Transform a_transform, int a_right, int a_forward, float height)
+        /// <param name="a_Object">Oject to spawn</param>
+        /// <param name="a_Position">Position to spawn</param>
+        /// <param name="a_SetGameController">Flag to set GameController reference</param>
+        private void InstanciateAnObject(GameObject a_Object, Vector3 a_Position, bool a_SetGameController = true)
         {
-            if (currentForward.z > 0)
-                a_transform.position = new Vector3(a_reference.position.x + a_right, height, a_reference.position.z + a_forward);
-            else if (currentForward.x < 0)
-                a_transform.position = new Vector3(a_reference.position.x - a_forward, height, a_reference.position.z + a_right);
-            else if (currentForward.x > 0)
-                a_transform.position = new Vector3(a_reference.position.x + a_forward, height, a_reference.position.z - a_right);
-            else
+            GameObject go = Instantiate(a_Object, mapParent);
+            go.name = "Coin";
+            go.transform.position = a_Position;
+            
+            if (a_SetGameController)
+                go.GetComponent<PlataformController>().gameController = this.gameController;
+        }
+
+        /// <summary>
+        /// Give Rangom plataform
+        /// </summary>
+        /// <param name="a_DiffForced">Force difficulty of plataform</param>
+        /// <returns>Plataform Object</returns>
+        private GameObject GetRandomPlataform(int a_DiffForced)
+        {
+            List<GameObject> pullPlataform = new List<GameObject>();
+
+            if (a_DiffForced > 0)
             {
-                if (Application.isEditor)
-                    DestroyImmediate(a_transform.gameObject);
-                else
-                    Destroy(a_transform.gameObject);
+                if (a_DiffForced > 5)
+                    a_DiffForced = 5;
+
+                foreach (GameObject plataform in allPlataforms)
+                {
+                    if (plataform.GetComponent<Junction>().difficulty == a_DiffForced)
+                        pullPlataform.Add(plataform);
+                }
             }
+            else
+                pullPlataform = allPlataforms;
+
+            return pullPlataform[0];
         }
         #endregion methods
     }

@@ -79,11 +79,23 @@ namespace Game.Controller.Player
             }
         }
 
+        private void OnTriggerEnter(Collider collision)
+        {
+            if (collision.gameObject.CompareTag("Collectable"))
+            {
+                collision.tag = "Untagged";
+
+                if (collision.GetComponent<PlataformController>().collectableType == PlataformController.CollectableType.Coin)
+                    gameControllerGO.GetComponent<GameController>().gameData.coins++;
+
+                GameObject.Destroy(collision.gameObject);
+            }
+        }
+
         private void OnCollisionEnter(Collision collision)
         {
             if (collision.gameObject.CompareTag("Obstacle"))
             {
-                Debug.Log("Obstaclle");
                 PlayerLose();
             }
         }
@@ -98,7 +110,7 @@ namespace Game.Controller.Player
             transform.position = initialPosition;
             transform.rotation = Quaternion.Euler(Vector3.zero);
 
-            coinsTextGO.GetComponent<TextMeshProUGUI>().text = MenuController.settingsController.Coins.ToString();
+            coinsTextGO.GetComponent<TextMeshProUGUI>().text = MenuController.settingsController.coins.ToString();
             SetCameraPostion();
         }
         
@@ -115,7 +127,7 @@ namespace Game.Controller.Player
         private void PlayerLose()
         {
             SetPlayerStatus(playerStatus.Finish);
-            gameControllerGO.GetComponent<UIController>().LoseLevel();
+            gameControllerGO.GetComponent<UIController>().GameLose(gameControllerGO.GetComponent<GameController>().gameData.coins);
         }
         
         private void PlayerMove()

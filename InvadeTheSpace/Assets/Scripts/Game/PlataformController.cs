@@ -10,20 +10,28 @@ using UnityEngine;
 
 public class PlataformController : MonoBehaviour
 {
-    [SerializeField] internal GameController gameController;
+    [SerializeField] private bool isMap = false;
+    [SerializeField] public CollectableType collectableType = CollectableType.None;
+    internal GameController gameController;
+
+    public enum CollectableType
+    {
+        None,
+        Coin,
+    }
 
     void Update()
     {
-        if (gameController.mapCurrentSpeed > 0)
+        if (gameController.gameData.currentSpeed > 0)
         {
-            transform.position -= Vector3.forward * gameController.mapCurrentSpeed * Time.deltaTime;
+            transform.position -= Vector3.forward * gameController.gameData.currentSpeed * Time.deltaTime;
 
             if (transform.position.z <= gameController.plataformEndPos)
             {
                 Destroy(gameObject);
 
-                if (this.CompareTag("Map"))
-                    gameController.InstanciateNewPlatform(Vector3.zero, true);
+                if (isMap)
+                    gameController.junctionLoader.LoadPlaraform(Vector3.zero, 0, false, true);
             }
         }
     }

@@ -6,7 +6,9 @@
 #region usings
 using Game.Controller.Player;
 using Game.Controller.UI;
+using Game.Data.Game;
 using Game.Data.Ship;
+using Game.Loader.Plataform;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -28,7 +30,7 @@ namespace Game.Controller.Game
         private GameObject losePanel;
         [SerializeField]
         [Tooltip("Map object reference")]
-        private GameObject map;
+        internal GameObject map;
         [SerializeField]
         [Tooltip("Number of plataforms in game")]
         private int plataformShowingAtTime;
@@ -38,33 +40,37 @@ namespace Game.Controller.Game
         #endregion vars
 
         #region internal vars
-        private List<GameObject> plataformGO;
-        internal float mapCurrentSpeed;
-        private float mapSpeed;
+        internal GameData gameData;
+
         private int plataformsCount;
-        private Vector3 plataformLastPos;
+        internal Vector3 plataformLastPos;
+        internal JunctionLoader junctionLoader;
         #endregion internal vars
 
         #region base methods
         private void Start()
         {
-            plataformsCount = 0;
-            mapSpeed = 2.0f;
-            mapCurrentSpeed = 0.0f;
+            junctionLoader = new JunctionLoader();
+            junctionLoader.Init(this);
 
-            var allPlataforms = Resources.LoadAll("Map/Plataforms/", typeof(GameObject));
-            plataformGO = new List<GameObject>();
+            gameData = new GameData(gameObject.GetComponent<UIController>());
 
-            foreach (Object plataform in allPlataforms)
-            {
-                plataformGO.Add(plataform as GameObject);
-            }
-
-            InstanciateStartingMap();
+            Init();
         }
         #endregion base methods
 
         #region custom methods
+        private void Init()
+        {
+            plataformsCount = 0;
+            
+            gameData.coins = 0;
+            gameData.speed = 2.0f;
+            gameData.currentSpeed = 0.0f;
+
+            InstanciateStartingMap();
+        }
+
         public void DisableSettingsButton()
         {
             settingsBtt.SetActive(false);
@@ -77,9 +83,9 @@ namespace Game.Controller.Game
         public void OnPlayerStatusChange(bool a_IsPlaying)
         {
             if (a_IsPlaying)
-                mapCurrentSpeed = mapSpeed;
+                gameData.currentSpeed = gameData.speed;
             else
-                mapCurrentSpeed = 0.0f;
+                gameData.currentSpeed = 0.0f;
         }
 
         /// <summary>
@@ -87,28 +93,17 @@ namespace Game.Controller.Game
         /// </summary>
         private void InstanciateStartingMap()
         {
-            for (int i = -1; i <= plataformShowingAtTime-2; i++)
+            junctionLoader.LoadPlaraform(Vector3.forward * -1 * 3, 1, true, false, false);
+
+            for (int i = 0; i <= plataformShowingAtTime-2; i++)
             {
-                InstanciateNewPlatform(Vector3.forward * i * 3);
+                if (i <= 3)
+                    junctionLoader.LoadPlaraform(Vector3.forward * i * 3, 1, false, false, false);
+                else
+                    junctionLoader.LoadPlaraform(Vector3.forward * i * 3);
             }
 
             plataformLastPos = Vector3.forward * (plataformShowingAtTime-2) * 3;
-        }
-
-        /// <summary>
-        /// Instanciate single plataform
-        /// </summary>
-        public void InstanciateNewPlatform(Vector3 a_PlataformPos, bool isLastPos = false)
-        {
-            GameObject go = Instantiate(plataformGO.First(), map.transform);
-            go.GetComponent<PlataformController>().gameController = this;
-
-            if (isLastPos)
-                go.transform.localPosition = plataformLastPos;
-            else
-                go.transform.localPosition = a_PlataformPos;
-
-            plataformsCount++;
         }
         #endregion custom methods
     }

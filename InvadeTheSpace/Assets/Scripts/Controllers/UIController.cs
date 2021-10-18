@@ -33,8 +33,11 @@ namespace Game.Controller.UI
         [Tooltip("Games panels poarent refence")]
         private GameObject gamePanels;
         [SerializeField]
-        [Tooltip("Shop coins object reference")]
-        private GameObject shopCoinGO;
+        [Tooltip("Menu coins object reference")]
+        private GameObject menuCoinGO;
+        [SerializeField]
+        [Tooltip("Game coins object reference")]
+        private GameObject gameCoinGO;
         [SerializeField]
         [Tooltip("3D camera reference")]
         private Camera gameCamera;
@@ -160,7 +163,7 @@ namespace Game.Controller.UI
             {
                 menuSettingsMusic.GetComponent<Image>().sprite = Resources.Load("UI/soundOn", typeof(Sprite)) as Sprite;
                 MenuController.settingsController.musicTrigger = (int)SettingsController.settingsTrigger.On;
-                StartBackgroundMusic();
+                StartMenuBackgroundMusic();
             }
         }
 
@@ -268,6 +271,7 @@ namespace Game.Controller.UI
         public void OnStartClick()
         {
             Time.timeScale = 1.0f;
+            gameCoinGO.transform.GetComponent<TextMeshProUGUI>().text = "0";
             player.PlayerStart();
         }
 
@@ -301,7 +305,6 @@ namespace Game.Controller.UI
             gameCamera.gameObject.SetActive(false);
             uiCamera.clearFlags = CameraClearFlags.Skybox;
 
-            UpdateUICoinsAmout();
             MenuUIInit();
         }
         
@@ -327,7 +330,7 @@ namespace Game.Controller.UI
         /// <summary>
         /// Set and play background music
         /// </summary>
-        public void StartBackgroundMusic()
+        public void StartMenuBackgroundMusic()
         {
             if (MenuController.settingsController.musicTrigger == (int)SettingsController.settingsTrigger.On)
             {
@@ -336,14 +339,6 @@ namespace Game.Controller.UI
                 audio.volume = 0.5f;
                 audio.loop = true;
                 audio.Play();
-            }
-        }
-
-        public void UpdateUICoinsAmout()
-        {
-            foreach (GameObject cointText in GetComponent<MenuController>().textCoin)
-            {
-                cointText.GetComponent<TextMeshProUGUI>().text = MenuController.settingsController.Coins.ToString();
             }
         }
 
@@ -383,9 +378,11 @@ namespace Game.Controller.UI
                 else
                     menuUIObject.transform.GetChild(i).gameObject.SetActive(false);
             }
-            StartBackgroundMusic();
+            StartMenuBackgroundMusic();
             menuUIObject.SetActive(true);
             gameUIObject.SetActive(false);
+
+            menuCoinGO.GetComponent<TextMeshProUGUI>().text = MenuController.settingsController.coins.ToString();
         }
 
         /// <summary>
@@ -404,13 +401,20 @@ namespace Game.Controller.UI
         /// <summary>
         /// Open Lose panel when finish game
         /// </summary>
-        public void LoseLevel()
+        public void GameLose(int a_CoinsEarn)
         {
             losePanel.SetActive(true);
+            shootBtt.SetActive(false);
             settingsBtt.SetActive(false);
+
+            MenuController.settingsController.coins += a_CoinsEarn;
         }
 
         #region bullets
+        /// <summary>
+        /// Update Bullets UI
+        /// </summary>
+        /// <param name="a_BulletAmount">curretns bullets amount</param>
         public void BulletsUpdate(int a_BulletAmount)
         {
             foreach (GameObject bullet in bulletsGO)
@@ -429,10 +433,10 @@ namespace Game.Controller.UI
             if (a_BulletAmount <= 2)
                 bulletsGO[0].SetActive(false);
             if (a_BulletAmount <= 1)
-                bulletsGO[1].SetActive(false);
+                bulletsGO[2].SetActive(false);
             if (a_BulletAmount <= 0)
             {
-                bulletsGO[2].GetComponent<Image>().color = Color.red;
+                bulletsGO[1].GetComponent<Image>().color = Color.red;
                 shootBtt.GetComponent<Image>().color = Color.red;
                 shootBtt.GetComponent<Button>().enabled = false;
 
@@ -445,19 +449,16 @@ namespace Game.Controller.UI
         }
         #endregion bullets
 
-        private IEnumerator ShopCoinsError()
+        #region coins
+        /// <summary>
+        /// Update Bullets UI
+        /// </summary>
+        /// <param name="a_BulletAmount">curretns bullets amount</param>
+        public void CoinsUpdate(int a_CoinsAmount)
         {
-            Color color = Color.red;
-            while (color.g < 1.0f && color.b < 1.0f)
-            {
-                color.g += Time.deltaTime;
-                color.b += Time.deltaTime;
-                shopCoinGO.transform.GetComponent<TextMeshProUGUI>().color = color;
-                yield return null;
-            }
-
-            shopCoinGO.transform.GetComponent<TextMeshProUGUI>().color = Color.white;
+            gameCoinGO.GetComponent<TextMeshProUGUI>().text = a_CoinsAmount.ToString();
         }
+        #endregion bullets
         #endregion custom methods
     }
 }

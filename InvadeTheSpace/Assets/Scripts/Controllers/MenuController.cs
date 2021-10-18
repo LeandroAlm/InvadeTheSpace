@@ -20,9 +20,6 @@ namespace Game.Controller.Menu
         [Tooltip("3d Camera reference")]
         private Camera gameCamera;
         [SerializeField]
-        [Tooltip("Coin text object reference")]
-        public GameObject[] textCoin;
-        [SerializeField]
         [Tooltip("Shop container object reference")]
         private GameObject shopContainerGO;
         [SerializeField]
@@ -50,11 +47,6 @@ namespace Game.Controller.Menu
         {
             gameCamera.gameObject.SetActive(false);
             SettingsInit();
-
-            foreach (GameObject cointText in textCoin)
-            {
-                cointText.GetComponent<TextMeshProUGUI>().text = settingsController.Coins.ToString();
-            }
 
             GetComponent<UI.UIController>().enabled = true;
         }

@@ -7,39 +7,26 @@
 using UnityEngine;
 #endregion usings
 
-namespace Game.Design.Junction
+namespace Game.Data.Plataform
 {
-    //[CreateAssetMenu(fileName = "LevelDesign", menuName = "ScriptableObjects/Junction")]
-    [System.Serializable]
-    public class Junction
+    public class Junction : MonoBehaviour
     {
-        public JunctionType JuntionType;
-        public bool[] CoinsPosition;
-        public int[] BlockWinPosition;
-        public int[] BlockLosePosition;
-
-        public enum JunctionType
-        {
-            Straight,
-        }
-        public enum JunctionPositions
-        {
-            Left,
-            CenterLeft,
-            Center,
-            CenterRight,
-            Right,
-        }
-
-        public void Init(JunctionType a_junctionType, bool[] a_CoinsPosition = null, int[] a_BlockWinPosition = null, int[] a_BlockLosePosition = null)
-        {
-            JuntionType = a_junctionType;
-            if (a_CoinsPosition != null)
-                CoinsPosition = a_CoinsPosition;
-            if (a_BlockWinPosition != null)
-                BlockWinPosition = a_BlockWinPosition;
-            if (a_BlockLosePosition != null)
-                BlockLosePosition = a_BlockLosePosition;
-        }
+        [Tooltip("Difficulty of plataform")]
+        [Range(1, 5)]
+        [SerializeField] public int difficulty = 1;
+        [Tooltip("Difficulty of plataform")]
+        [Range(1, 100)]
+        [SerializeField] public int probCoinRow = 1;
+        [Tooltip("Where coins can spawn")]
+        [SerializeField] public bool[] coinsPosition = new bool[15];
+        [Tooltip("Probability of spawn a coin")]
+        [Range(1, 100)]
+        [SerializeField] public int probSingleCoin = 1;
+        [Tooltip("Probability of spawn coins row")]
+        [Range(1, 100)]
+        [SerializeField] public int probCoinsRow = 1;
+        [Tooltip("Probability of spawn coins row")]
+        [Range(1, 100)]
+        [SerializeField] public int[] probCoinsEachRow = new int[5];
     }
 }

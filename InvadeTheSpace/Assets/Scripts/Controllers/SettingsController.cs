@@ -12,11 +12,11 @@ namespace Game.Controller.Settings
     public class SettingsController
     {
         #region internal variables
-        private int _Coin = 0;
-        private int _Sound = 1;
-        private int _Music = 1;
-        private int _Vibration = 1;
-        private int _BoxID = 0;
+        private int _coin = 0;
+        private int _sound = 1;
+        private int _music = 1;
+        private int _vibration = 1;
+        private int _boxID = 0;
         private string _Shop = "";
         public enum settingsTrigger
         {
@@ -27,53 +27,53 @@ namespace Game.Controller.Settings
 
         #region get/set variabels
         /// <summary> sound On/Off </summary>
-        public int Coins
+        public int coins
         {
-            get { return _Coin; }
+            get { return _coin; }
             set
             {
-                _Coin = value;
-                PlayerPrefs.SetInt("COIN", _Coin);
+                _coin = value;
+                PlayerPrefs.SetInt("COIN", _coin);
             }
         }
         /// <summary> sound On/Off </summary>
         public int soundTrigger
         {
-            get { return _Sound; }
+            get { return _sound; }
             set
             {
-                _Sound = value;
-                PlayerPrefs.SetInt("SOUND", _Sound);
+                _sound = value;
+                PlayerPrefs.SetInt("SOUND", _sound);
             }
         }
         /// <summary> music On/Off </summary>
         public int musicTrigger
         {
-            get { return _Music; }
+            get { return _music; }
             set
             {
-                _Music = value;
-                PlayerPrefs.SetInt("MUSIC", _Music);
+                _music = value;
+                PlayerPrefs.SetInt("MUSIC", _music);
             }
         }
         /// <summary> vibartion On/Off </summary>
         public int vibrationTrigger
         {
-            get { return _Vibration; }
+            get { return _vibration; }
             set
             {
-                _Vibration = value;
-                PlayerPrefs.SetInt("VIBRATION", _Vibration);
+                _vibration = value;
+                PlayerPrefs.SetInt("VIBRATION", _vibration);
             }
         }
         /// <summary> vibartion On/Off </summary>
         public int currentBoxID
         {
-            get { return _BoxID; }
+            get { return _boxID; }
             set
             {
-                _BoxID = value;
-                PlayerPrefs.SetInt("BOX", _BoxID);
+                _boxID = value;
+                PlayerPrefs.SetInt("BOX", _boxID);
             }
         }
         /// <summary> shop Materials owned </summary>
@@ -95,27 +95,27 @@ namespace Game.Controller.Settings
             // else set default
 
             if (PlayerPrefs.GetInt("COIN") > 0)
-                _Coin = PlayerPrefs.GetInt("COIN");
+                _coin = PlayerPrefs.GetInt("COIN");
             else
-                Coins = 0;
+                coins = 0;
 
             if (PlayerPrefs.GetInt("SOUND") > 0)
-                _Sound = PlayerPrefs.GetInt("SOUND");
+                _sound = PlayerPrefs.GetInt("SOUND");
             else
                 soundTrigger = (int)settingsTrigger.On;
 
             if (PlayerPrefs.GetInt("MUSIC") > 0)
-                _Music = PlayerPrefs.GetInt("MUSIC");
+                _music = PlayerPrefs.GetInt("MUSIC");
             else
                 musicTrigger = (int)settingsTrigger.On;
 
             if (PlayerPrefs.GetInt("VIBRATION") > 0)
-                _Vibration = PlayerPrefs.GetInt("VIBRATION");
+                _vibration = PlayerPrefs.GetInt("VIBRATION");
             else
                 vibrationTrigger = (int)settingsTrigger.On;
 
             if (PlayerPrefs.GetInt("BOX") > 0)
-                _BoxID = PlayerPrefs.GetInt("BOX");
+                _boxID = PlayerPrefs.GetInt("BOX");
             else
                 currentBoxID = 0;
 
