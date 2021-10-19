@@ -10,14 +10,15 @@ using UnityEngine;
 
 public class PlataformController : MonoBehaviour
 {
-    [SerializeField] private bool isMap = false;
-    [SerializeField] public CollectableType collectableType = CollectableType.None;
+    [SerializeField] public Type pieceType = Type.None;
     internal GameController gameController;
 
-    public enum CollectableType
+    public enum Type
     {
         None,
+        Map,
         Coin,
+        Bullet
     }
 
     void Update()
@@ -30,8 +31,11 @@ public class PlataformController : MonoBehaviour
             {
                 Destroy(gameObject);
 
-                if (isMap)
+                if (pieceType == Type.Map)
+                {
                     gameController.junctionLoader.LoadPlaraform(Vector3.zero, 0, false, true);
+                    gameController.gameData.plataforms++;
+                }
             }
         }
     }

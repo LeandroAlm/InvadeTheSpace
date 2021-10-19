@@ -13,6 +13,7 @@ using System.Collections;
 using Game.Controller.Player;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Controller.Game;
 #endregion usings
 
 namespace Game.Controller.UI
@@ -186,63 +187,6 @@ namespace Game.Controller.UI
         #endregion SETTINGS
 
         #region SHOP
-        /// <summary>
-        /// Buy and save option of materials
-        /// </summary>
-        /// <param name="a_ID"></param>
-        public void OnShopItemBuyClick(GameObject a_BttReference)
-        {
-            //string current_shop = MenuController.settingsController.currentShop;
-
-            //if (MenuController.settingsController.Coins - GetComponent<MenuController>().shopCost >= 0)
-            //{
-            //    current_shop += a_BttReference.name + ";";
-            //    MenuController.settingsController.currentShop = current_shop;
-
-            //    shopContainer.transform.Find(MenuController.settingsController.currentBoxID.ToString()).GetChild(0).gameObject.SetActive(false);
-            //    MenuController.settingsController.currentBoxID = int.Parse(a_BttReference.name);
-
-            //    UpdateUICoinsAmout();
-
-            //    MenuController.settingsController.Coins -= GetComponent<MenuController>().shopCost;
-            //    foreach (GameObject cointText in GetComponent<MenuController>().textCoin)
-            //    {
-            //        cointText.GetComponent<TextMeshProUGUI>().text = MenuController.settingsController.Coins.ToString();
-            //    }
-
-            //    a_BttReference.transform.GetChild(1).GetComponent<Image>().color = Color.white;
-            //    a_BttReference.transform.GetChild(1).GetComponent<Button>().onClick.RemoveAllListeners();
-            //    a_BttReference.transform.GetChild(1).GetComponent<Button>()?.onClick.AddListener(() => { GetComponent<UIController>().OnShopItemChangeClick(a_BttReference); });
-            //    a_BttReference.transform.GetChild(1).GetChild(0).gameObject.SetActive(false);
-
-            //    a_BttReference.transform.GetChild(0).gameObject.SetActive(true);
-            //}
-            //else
-            //{
-            //    StopAllCoroutines();
-            //    StartCoroutine("ShopCoinsError");
-            //}
-        }
-
-        /// <summary>
-        /// Change and save option of materials
-        /// </summary>
-        /// <param name="a_ID"></param>
-        public void OnShopItemChangeClick(GameObject a_BttReference)
-        {
-            //if (MenuController.settingsController.currentBoxID != int.Parse(a_BttReference.name))
-            //{
-            //    string current_shop = MenuController.settingsController.currentShop;
-            //    string[] allMaterials = current_shop.Split(';');
-
-            //    if (allMaterials.ToList().Contains(a_BttReference.name))
-            //    {
-            //        shopContainer.transform.Find(MenuController.settingsController.currentBoxID.ToString()).GetChild(0).gameObject.SetActive(false);
-            //        MenuController.settingsController.currentBoxID = int.Parse(a_BttReference.name);
-            //        a_BttReference.transform.GetChild(0).gameObject.SetActive(true);
-            //    }
-            //}
-        }
         #endregion SHOP
 
         #region GAME
@@ -262,6 +206,7 @@ namespace Game.Controller.UI
         public void OnRestartClick()
         {
             GameUILayoutInit();
+            gameObject.GetComponent<GameController>().Init();
             player.Init();
         }
 
@@ -272,6 +217,7 @@ namespace Game.Controller.UI
         {
             Time.timeScale = 1.0f;
             gameCoinGO.transform.GetComponent<TextMeshProUGUI>().text = "0";
+            settingsBtt.SetActive(true);
             player.PlayerStart();
         }
 
@@ -302,6 +248,7 @@ namespace Game.Controller.UI
         public void OnMenuClick()
         {
             // Back to Menu
+            player.gameObject.SetActive(false);
             gameCamera.gameObject.SetActive(false);
             uiCamera.clearFlags = CameraClearFlags.Skybox;
 

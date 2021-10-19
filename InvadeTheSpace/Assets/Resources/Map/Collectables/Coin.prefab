@@ -108,8 +108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdac420b4cbe1194d9e3bbc3d9ee499d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isMap: 0
-  collectableType: 1
+  pieceType: 2
 --- !u!65 &6668536159071098104
 BoxCollider:
   m_ObjectHideFlags: 0

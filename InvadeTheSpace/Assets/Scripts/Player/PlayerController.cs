@@ -59,16 +59,34 @@ namespace Game.Controller.Player
         /// Uses to update and limit max side position (keeping player inside of platform)
         /// </summary>
         private float currentLimitControl;
+        /// <summary>
+        /// Ship object reference
+        /// </summary>
         private GameObject shipGO;
+        /// <summary>
+        /// ShipData stores all INFO of ship
+        /// </summary>
         private ShipData shipData;
+        /// <summary>
+        /// Reference of GameController
+        /// </summary>
+        private GameController gameController;
+        /// <summary>
+        /// Reference of UIController
+        /// </summary>
+        private UIController uiController;
         #endregion internal vars
 
         #region base methods
         private void Start()
         {
+            gameController = gameControllerGO.GetComponent<GameController>();
+            uiController = gameControllerGO.GetComponent<UIController>();
+
             shipGO = transform.GetChild(0).gameObject;
-            shipData = new ShipData(gameControllerGO.GetComponent<UIController>());
-            Init();
+            shipData = new ShipData(uiController);
+            //Init();
+            gameObject.SetActive(false);
         }
 
         private void Update()
@@ -77,6 +95,10 @@ namespace Game.Controller.Player
             {
                 PlayerMove();
             }
+
+#if UNITY_EDITOR
+            Debug.DrawLine(new Vector3(transform.position.x, 0.5f, transform.position.z + 0.4f), Vector3.forward * 100, Color.red);
+#endif
         }
 
         private void OnTriggerEnter(Collider collision)
@@ -85,8 +107,10 @@ namespace Game.Controller.Player
             {
                 collision.tag = "Untagged";
 
-                if (collision.GetComponent<PlataformController>().collectableType == PlataformController.CollectableType.Coin)
-                    gameControllerGO.GetComponent<GameController>().gameData.coins++;
+                if (collision.GetComponent<PlataformController>().pieceType == PlataformController.Type.Coin)
+                    gameController.gameData.coins++;
+                else if (collision.GetComponent<PlataformController>().pieceType == PlataformController.Type.Bullet)
+                    shipData.bullets++;
 
                 GameObject.Destroy(collision.gameObject);
             }
@@ -94,7 +118,7 @@ namespace Game.Controller.Player
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.CompareTag("Obstacle"))
+            if (collision.gameObject.CompareTag("Obstacle") || collision.gameObject.CompareTag("Destructible"))
             {
                 PlayerLose();
             }
@@ -104,6 +128,9 @@ namespace Game.Controller.Player
         #region custom methods
         public void Init()
         {
+            shipGO.SetActive(true);
+            gameObject.SetActive(true);
+            shipGO.transform.rotation = Quaternion.Euler(0, 0, 0);
             shipData.ShipStartPlay(startingSpeed);
             currentLimitControl = 0;
 
@@ -126,8 +153,11 @@ namespace Game.Controller.Player
 
         private void PlayerLose()
         {
+            StopAllCoroutines();
+            shipGO.SetActive(false);
+            Instantiate(gameController.explosionParticle, shipGO.transform.position, shipGO.transform.rotation);
             SetPlayerStatus(playerStatus.Finish);
-            gameControllerGO.GetComponent<UIController>().GameLose(gameControllerGO.GetComponent<GameController>().gameData.coins);
+            uiController.GameLose(gameController.gameData.coins);
         }
         
         private void PlayerMove()
@@ -187,11 +217,11 @@ namespace Game.Controller.Player
             textMeshPro.outlineColor = new Color32(255, 0, 0, 255);
             shipGO.GetComponent<Animator>().SetBool("shoot", true);
 
-            if (Physics.Raycast(new Vector3(transform.position.x, 0.5f, transform.position.z + 0.4f), Vector3.forward, out RaycastHit hit, 100))
+            if (Physics.Raycast(new Vector3(transform.position.x, 0.5f, transform.position.z + 0.4f), Vector3.forward, out RaycastHit hit, 50, 1 << 3))
             {
                 if (hit.collider.CompareTag("Destructible"))
                 {
-                    hit.collider.GetComponent<Destructible.DestructibleController>().ApplyDamage(1);
+                    hit.collider.GetComponent<Destructible.DestructibleController>().ApplyDamage(1, gameController);
                 }
             }
 
@@ -242,9 +272,9 @@ namespace Game.Controller.Player
             currentStatus = a_PlayerStatus;
 
             if (currentStatus == playerStatus.Pause || currentStatus == playerStatus.Finish)
-                gameControllerGO.GetComponent<GameController>().OnPlayerStatusChange(false);
+                gameController.OnPlayerStatusChange(false);
             else
-                gameControllerGO.GetComponent<GameController>().OnPlayerStatusChange(true);
+                gameController.OnPlayerStatusChange(true);
         }
         #endregion custom methods
     }

@@ -37,12 +37,19 @@ namespace Game.Controller.Game
         [SerializeField]
         [Tooltip("Z position when plataform can be destroyed")]
         internal int plataformEndPos;
+        [SerializeField]
+        [Range(0.001f, 0.1f)]
+        [Tooltip("Speed incremented each 10 plataforms")]
+        internal float baseSpeedIncrement;
+        [SerializeField]
+        [Tooltip("Speed upgrade minimum plataform count")]
+        internal int minToSpeedUpgrade;
         #endregion vars
 
         #region internal vars
+        [HideInInspector]public GameObject explosionParticle;
         internal GameData gameData;
 
-        private int plataformsCount;
         internal Vector3 plataformLastPos;
         internal JunctionLoader junctionLoader;
         #endregion internal vars
@@ -53,20 +60,27 @@ namespace Game.Controller.Game
             junctionLoader = new JunctionLoader();
             junctionLoader.Init(this);
 
-            gameData = new GameData(gameObject.GetComponent<UIController>());
+            gameData = new GameData(gameObject.GetComponent<UIController>(), baseSpeedIncrement, minToSpeedUpgrade);
+
+            explosionParticle = Resources.Load("GFX/Explosion", typeof(GameObject)) as GameObject;
 
             Init();
         }
         #endregion base methods
 
         #region custom methods
-        private void Init()
+        public void Init()
         {
-            plataformsCount = 0;
+            gameData.plataforms = 0;
             
             gameData.coins = 0;
             gameData.speed = 2.0f;
             gameData.currentSpeed = 0.0f;
+
+            foreach (Transform child in map.transform)
+            {
+                Destroy(child.gameObject);
+            }
 
             InstanciateStartingMap();
         }
@@ -93,12 +107,12 @@ namespace Game.Controller.Game
         /// </summary>
         private void InstanciateStartingMap()
         {
-            junctionLoader.LoadPlaraform(Vector3.forward * -1 * 3, 1, true, false, false);
+            junctionLoader.LoadPlaraform(Vector3.forward * -1 * 3, 1, true, false, false, false);
 
             for (int i = 0; i <= plataformShowingAtTime-2; i++)
             {
-                if (i <= 3)
-                    junctionLoader.LoadPlaraform(Vector3.forward * i * 3, 1, false, false, false);
+                if (i <= 2)
+                    junctionLoader.LoadPlaraform(Vector3.forward * i * 3, 1, false, false, false, false);
                 else
                     junctionLoader.LoadPlaraform(Vector3.forward * i * 3);
             }

@@ -109,7 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdac420b4cbe1194d9e3bbc3d9ee499d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isMap: 1
+  pieceType: 1
 --- !u!114 &3507262835918060817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,8 +123,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   difficulty: 1
-  probCoinRow: 1
   coinsPosition: 010101010101010101010101010101
-  probSingleCoin: 15
+  bulletsPosition: 000000000001010101010000000000
+  destructiblesPosition: 010101010101010101010101010101
+  probSingleCoin: 10
   probCoinsRow: 20
-  probCoinsEachRow: 0000000000000000000000000000000000000000
+  probCoinsEachRow: 2d000000190000000f0000000a00000005000000
+  probSingleBullet: 4
+  probSingleDestructible: 4
