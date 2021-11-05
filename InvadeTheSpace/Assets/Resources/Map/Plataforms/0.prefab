@@ -123,11 +123,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   difficulty: 1
-  coinsPosition: 010101010101010101010101010101
-  bulletsPosition: 000000000001010101010000000000
-  destructiblesPosition: 010101010101010101010101010101
-  probSingleCoin: 10
-  probCoinsRow: 20
-  probCoinsEachRow: 2d000000190000000f0000000a00000005000000
-  probSingleBullet: 4
-  probSingleDestructible: 4
+  interactiveObjects:
+  - objectType: 2
+    subType: 0
+    spawnsPositions: 010101010101010101010101010101
+    probSpawn: 10
+    probInRow: 5
+    probEachRow: 32000000190000000c0000000800000005000000
+  - objectType: 3
+    subType: 0
+    spawnsPositions: 010101010101010101010101010101
+    probSpawn: 5
+    probInRow: 0
+    probEachRow: 
+  - objectType: 1
+    subType: 1
+    spawnsPositions: 000000000001010101010000000000
+    probSpawn: 5
+    probInRow: 0
+    probEachRow: 

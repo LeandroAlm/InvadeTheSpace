@@ -12,12 +12,16 @@ namespace Game.Data.Ship
     public class ShipData
     {
         #region internal vars
-        private int _health, _bullets;
+        private int _bullets;
+        private float _accelaration;
         private float _speed;
         private UIController uiController;
         #endregion internal vars
 
         #region vars references
+        /// <summary>
+        /// Current bullets in ship
+        /// </summary>
         internal int bullets
         {
             get { return _bullets; }
@@ -27,22 +31,26 @@ namespace Game.Data.Ship
                 uiController.BulletsUpdate(_bullets);
             }
         }
-        internal int health
-        {
-            get { return _health; }
-            set
-            {
-                _health = value;
-                //uiController.BulletsUpdate(_bullets);
-            }
-        }
+        /// <summary>
+        /// Current speed of ship
+        /// </summary>
         internal float speed
         {
             get { return _speed; }
             set
             {
                 _speed = value;
-                //uiController.BulletsUpdate(_bullets);
+            }
+        }
+        /// <summary>
+        /// Current accelaration of ship
+        /// </summary>
+        internal float accelaration
+        {
+            get { return _accelaration; }
+            set
+            {
+                _accelaration = value;
             }
         }
         #endregion vars references
@@ -53,7 +61,7 @@ namespace Game.Data.Ship
             uiController = a_UIController;
         }
 
-        internal void ShipStartPlay(float a_StartingSpeed = 2.0f)
+        internal void Init(float a_StartingSpeed = 2.0f)
         {
             bullets = 1;
             speed = a_StartingSpeed;

@@ -34,9 +34,6 @@ namespace Game.Controller.Player
         [Tooltip("Side speed")]
         private float startingSpeed;
         [SerializeField]
-        [Tooltip("Acceleration multiplier for side move, when drag direction change Acceleration goes 0.0f - 1.0f with this multiplier. Created to smooth direction change")]
-        private float accelerationMultiplier;
-        [SerializeField]
         [Tooltip("Player initial possition")]
         private Vector3 initialPosition;
         [SerializeField]
@@ -107,9 +104,9 @@ namespace Game.Controller.Player
             {
                 collision.tag = "Untagged";
 
-                if (collision.GetComponent<PlataformController>().pieceType == PlataformController.Type.Coin)
+                if (collision.GetComponent<PlataformController>().pieceType == PlataformController.ObjectType.Coin)
                     gameController.gameData.coins++;
-                else if (collision.GetComponent<PlataformController>().pieceType == PlataformController.Type.Bullet)
+                else if (collision.GetComponent<PlataformController>().pieceType == PlataformController.ObjectType.Bullet)
                     shipData.bullets++;
 
                 GameObject.Destroy(collision.gameObject);
@@ -131,7 +128,7 @@ namespace Game.Controller.Player
             shipGO.SetActive(true);
             gameObject.SetActive(true);
             shipGO.transform.rotation = Quaternion.Euler(0, 0, 0);
-            shipData.ShipStartPlay(startingSpeed);
+            shipData.Init(startingSpeed);
             currentLimitControl = 0;
 
             transform.position = initialPosition;
@@ -196,7 +193,7 @@ namespace Game.Controller.Player
         {
             if (currentStatus == playerStatus.Play && shipData.bullets > 0)
             {
-                SetPlayerStatus(currentStatus = playerStatus.Shoot);
+                SetPlayerStatus(playerStatus.Shoot);
                 shipData.bullets--;
 
                 // shoot animation

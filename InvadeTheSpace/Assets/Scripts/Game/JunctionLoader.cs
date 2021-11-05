@@ -5,6 +5,7 @@
 
 #region usings
 using Game.Controller.Game;
+using Game.Data.Objects;
 using Game.Data.Plataform;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace Game.Loader.Plataform
         private GameController gameController;
         private Transform mapParent;
         private int plataformCount;
+        private bool forceBase = false;
         #endregion vars
 
         #region methods
@@ -67,71 +69,10 @@ namespace Game.Loader.Plataform
 
             go.name = "Junction_" + plataformCount.ToString();
 
-            bool[] currentAvaibility = new bool[15];
-            for (int i = 0; i < 15; i++)
-            {
-                currentAvaibility[i] = true;
-            }
-
-
-            if (a_Collectables)
-            {
-                currentAvaibility = SpawCoins(junction, currentAvaibility, go.transform.position);
-                currentAvaibility = SpawnBullets(junction, currentAvaibility, go.transform.position);
-            }
-            if (a_Destructibles)
-            {
-                currentAvaibility = SpawnAsteroids(junction, currentAvaibility, go.transform.position);
-            }
+            SpawnAllObjects(junction.interactiveObjects, go.transform.position, a_Collectables, a_Destructibles);
 
             go.transform.parent = mapParent;
             plataformCount++;
-        }
-
-        private bool[] InstanciateObejectsInRow(Junction a_junction, bool[] a_Avaibility, Vector3 a_MiddlePos, int a_RowsAmout, GameObject a_Object)
-        {
-            bool[] array = a_Avaibility;
-            int[] rowsPos = new int[5];
-            int[] rows = new int[5];
-            int rowsCount = 0;
-
-            for (int i = 0; i < 5; i++)
-            {
-                int count = 0;
-                for (int j = 0; j < 3; j++)
-                {
-                    if (a_junction.coinsPosition[i + j * 5] && array[i + j * 5])
-                        count++;
-                }
-                if (count >= 3)
-                {
-                    rows[rowsCount] = i;
-                    rowsCount++;
-                }
-
-                rowsPos[i] = i;
-            }
-
-            if (a_RowsAmout > rowsCount)
-                a_RowsAmout = rowsCount;
-
-            for (int i = 0; i < a_RowsAmout; i++)
-            {
-                int rand = Random.Range(0, rowsCount - 1);
-
-                for (int j = 0; j < 3; j++)
-                {
-                    InstanciateAnObject(a_Object, a_MiddlePos + new Vector3(rowsPos[rows[rand]] - 2, 0.5f, j-1));
-                    array[(rowsPos[rows[rand]]) + (j*5)] = false;
-                }
-
-                rows = rows.Where(t => t != rows[rand]).ToArray();
-                rowsCount--;
-                if (rowsCount < 0)
-                    break;
-            }
-
-            return array;
         }
 
         /// <summary>
@@ -156,96 +97,126 @@ namespace Game.Loader.Plataform
         private GameObject GetRandomPlataform(int a_DiffForced)
         {
             List<GameObject> pullPlataform = new List<GameObject>();
+            GameObject plat = null;
 
-            if (a_DiffForced > 0)
+            if (!forceBase)
             {
-                if (a_DiffForced > 5)
-                    a_DiffForced = 5;
-
-                foreach (GameObject plataform in allPlataforms)
+                if (a_DiffForced > 0)
                 {
-                    if (plataform.GetComponent<Junction>().difficulty == a_DiffForced)
-                        pullPlataform.Add(plataform);
+                    if (a_DiffForced > 5)
+                        a_DiffForced = 5;
+
+                    foreach (GameObject plataform in allPlataforms)
+                    {
+                        if (plataform.GetComponent<Junction>().difficulty == a_DiffForced)
+                            pullPlataform.Add(plataform);
+                    }
                 }
+                else
+                    pullPlataform = allPlataforms;
+
+                plat = pullPlataform[Random.Range(0, pullPlataform.Count)];
+
+                if (plat != allPlataforms[0])
+                    forceBase = true;
             }
             else
-                pullPlataform = allPlataforms;
+            {
+                plat = allPlataforms[0];
+                forceBase = false;
+            }
 
-            return pullPlataform[0];
+
+            return plat;
         }
 
         #region objects function
-        private bool[] SpawCoins(Junction a_Junction, bool[] a_Avaibility, Vector3 a_Position)
+        /// <summary>
+        /// Spawn all objects if possible
+        /// </summary>
+        /// <param name="a_AllObjects">All Objects possible in plataform</param>
+        /// <param name="a_Position">Junction position</param>
+        /// <param name="a_Collectables">is to add collectables</param>
+        /// <param name="a_Destructibles">is to add destructibles</param>
+        private void SpawnAllObjects(InteractiveObject[] a_AllObjects, Vector3 a_Position, bool a_Collectables, bool a_Destructibles)
         {
-            if (Random.Range(1, 101) <= a_Junction.probCoinsRow)
-            {
-                int rand_1 = Random.Range(1, 101);
-                int loop = 1;
-                int sume = 0;
+            bool[] avaibility = new bool[15];
+            int count_1 = 0;
+            int rand_1 = 0;
 
-                for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 15; i++)
+                avaibility[i] = true;
+
+            foreach (InteractiveObject child in a_AllObjects)
+            {
+                if ((child.subType == PlataformController.SubType.Collectable && !a_Collectables)
+                    || (child.subType == PlataformController.SubType.Destructible && !a_Destructibles))
+                    continue;
+
+                rand_1 = Random.Range(1, 101);
+
+                if (rand_1 <= child.probInRow)
                 {
-                    sume += a_Junction.probCoinsEachRow[i];
-                    if (rand_1 <= sume)
+                    rand_1 = Random.Range(1, 101);
+                    int temp_sum = 0;
+                    for (int i = 0; i < 5; i++)
                     {
-                        loop = i + 1;
-                        break;
-                    }
-                }
+                        temp_sum += child.probEachRow[i];
 
-                a_Avaibility = InstanciateObejectsInRow(a_Junction, a_Avaibility, a_Position, loop, coinObject);
-            }
-            else
-            {
-                for (int x = 0; x < 5; x++)
-                    for (int y = 0; y < 3; y++)
-                    {
-                        if (a_Junction.coinsPosition[(x + y * 5)] && a_Avaibility[x + y * 5])
+                        if (temp_sum <= rand_1)
                         {
-                            if (Random.Range(1, 101) <= a_Junction.probSingleCoin)
+                            int[] temp_array = new int[5];
+                            
+                            for (int j = 0; j < 5; j++)
                             {
-                                InstanciateAnObject(coinObject, a_Position + new Vector3(x - 2, 0.5f, y - 1));
-                                a_Avaibility[x + y * 5] = false;
+                                temp_sum = 0; // use as counter
+
+                                for (int h = 0; h < 3; h++)
+                                    if (avaibility[j + h * 5])
+                                        temp_sum++;
+
+                                if (temp_sum >= 3)
+                                {
+                                    temp_array[count_1] = j;
+                                    count_1++;
+                                }
                             }
+
+                            for (int j = 0; j < i; j++)
+                            {
+                                rand_1 = Random.Range(0, temp_sum);
+
+                                for (int y = 0; y < 3; y++)
+                                {
+                                    InstanciateAnObject(coinObject, a_Position + new Vector3(temp_array[rand_1] - 2, 0.5f, y - 1));
+                                    avaibility[(temp_array[rand_1] - 2) + ((y - 1) * 5)] = false;
+                                }
+
+
+                                temp_array = temp_array.Where(t => t != temp_array[rand_1]).ToArray();
+                                temp_sum--;
+                            }
+
+                            break;
                         }
                     }
+                }
+                else
+                {
+                    for (int x = 0; x < 5; x++)
+                        for (int y = 0; y < 3; y++)
+                            if (avaibility[x + y * 5])
+                            {
+                                rand_1 = Random.Range(1, 101);
+
+                                if (rand_1 <= child.probSpawn)
+                                {
+                                    InstanciateAnObject(coinObject, a_Position + new Vector3(x - 2, 0.5f, y - 1));
+                                    avaibility[x + (y * 5)] = false;
+                                }
+                            }
+                }
             }
-
-            return a_Avaibility;
-        }
-        private bool[] SpawnBullets(Junction a_Junction, bool[] a_Avaibility, Vector3 a_Position)
-        {
-            for (int x = 0; x < 5; x++)
-                for (int y = 0; y < 3; y++)
-                {
-                    if (a_Junction.bulletsPosition[(x + y * 5)] && a_Avaibility[x + y * 5])
-                    {
-                        if (Random.Range(1, 101) <= a_Junction.probSingleBullet)
-                        {
-                            InstanciateAnObject(bulletObject, a_Position + new Vector3(x - 2, 0.15f, y - 1));
-                            a_Avaibility[x + y * 5] = false;
-                        }
-                    }
-                }
-
-            return a_Avaibility;
-        }
-        private bool[] SpawnAsteroids(Junction a_Junction, bool[] a_Avaibility, Vector3 a_Position)
-        {
-            for (int x = 0; x < 5; x++)
-                for (int y = 0; y < 3; y++)
-                {
-                    if (a_Junction.coinsPosition[(x + y * 5)] && a_Avaibility[x + y * 5])
-                    {
-                        if (Random.Range(1, 101) <= a_Junction.probSingleDestructible)
-                        {
-                            InstanciateAnObject(destructibles[Random.Range(0, destructibles.Count)], a_Position + new Vector3(x - 2, 0.3f, y - 1));
-                            a_Avaibility[x + y * 5] = false;
-                        }
-                    }
-                }
-
-            return a_Avaibility;
         }
         #endregion objects function
         #endregion methods

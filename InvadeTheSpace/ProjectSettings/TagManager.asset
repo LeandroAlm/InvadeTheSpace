@@ -8,16 +8,17 @@ TagManager:
   - Coin
   - Obstacle
   - Destructible
+  - Collectable
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - HitPoint
   - Water
   - UI
   - 
   - 
-  - PostProcessing
+  - 
   - 
   - 
   - 

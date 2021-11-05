@@ -7,6 +7,7 @@
 using Game.Controller.Player;
 using Game.Controller.UI;
 using Game.Data.Game;
+using Game.Data.Game.SO;
 using Game.Data.Ship;
 using Game.Loader.Plataform;
 using System.Collections.Generic;
@@ -38,12 +39,8 @@ namespace Game.Controller.Game
         [Tooltip("Z position when plataform can be destroyed")]
         internal int plataformEndPos;
         [SerializeField]
-        [Range(0.001f, 0.1f)]
-        [Tooltip("Speed incremented each 10 plataforms")]
-        internal float baseSpeedIncrement;
-        [SerializeField]
-        [Tooltip("Speed upgrade minimum plataform count")]
-        internal int minToSpeedUpgrade;
+        [Tooltip("Game data scriptableObject with info")]
+        internal GameDataSO gameDataSO;
         #endregion vars
 
         #region internal vars
@@ -60,7 +57,7 @@ namespace Game.Controller.Game
             junctionLoader = new JunctionLoader();
             junctionLoader.Init(this);
 
-            gameData = new GameData(gameObject.GetComponent<UIController>(), baseSpeedIncrement, minToSpeedUpgrade);
+            gameData = new GameData(gameObject.GetComponent<UIController>(), gameDataSO);
 
             explosionParticle = Resources.Load("GFX/Explosion", typeof(GameObject)) as GameObject;
 
