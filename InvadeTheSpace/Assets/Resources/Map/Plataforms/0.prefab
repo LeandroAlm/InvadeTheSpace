@@ -136,7 +136,7 @@ MonoBehaviour:
     probSpawn: 5
     probInRow: 0
     probEachRow: 
-  - objectType: 1
+  - objectType: 4
     subType: 1
     spawnsPositions: 000000000001010101010000000000
     probSpawn: 5

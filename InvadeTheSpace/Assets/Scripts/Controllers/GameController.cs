@@ -13,6 +13,7 @@ using Game.Loader.Plataform;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 #endregion usings
 
 namespace Game.Controller.Game
@@ -41,6 +42,9 @@ namespace Game.Controller.Game
         [SerializeField]
         [Tooltip("Game data scriptableObject with info")]
         internal GameDataSO gameDataSO;
+        [SerializeField]
+        [Tooltip("Debug object reference")]
+        private GameObject debuggingGO;
         #endregion vars
 
         #region internal vars
@@ -62,6 +66,15 @@ namespace Game.Controller.Game
             explosionParticle = Resources.Load("GFX/Explosion", typeof(GameObject)) as GameObject;
 
             Init();
+        }
+
+        private void Update()
+        {
+            if (debuggingGO != null || debuggingGO.activeSelf)
+            {
+                debuggingGO.transform.GetChild(0).GetComponent<Text>().text = "Speed: " + gameData.speed;
+                debuggingGO.transform.GetChild(1).GetComponent<Text>().text = "Current Speed: " + gameData.currentSpeed;
+            }
         }
         #endregion base methods
 

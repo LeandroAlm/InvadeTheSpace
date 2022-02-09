@@ -18,7 +18,7 @@ namespace Game.Loader.Plataform
     {
         #region vars
         private List<GameObject> allPlataforms;
-        private List<GameObject> destructibles;
+        private List<GameObject> metereoidObjctes;
         private GameObject coinObject, bulletObject;
 
         private GameController gameController;
@@ -39,10 +39,10 @@ namespace Game.Loader.Plataform
 
             // Destructibles
             var _allDestructibles = Resources.LoadAll("Map/Destructible/", typeof(GameObject));
-            destructibles = new List<GameObject>();
+            metereoidObjctes = new List<GameObject>();
 
             foreach (Object destru in _allDestructibles)
-                destructibles.Add(destru as GameObject);
+                metereoidObjctes.Add(destru as GameObject);
 
             // Collect
             coinObject = Resources.Load("Map/Collectables/Coin") as GameObject;
@@ -115,7 +115,8 @@ namespace Game.Loader.Plataform
                 else
                     pullPlataform = allPlataforms;
 
-                plat = pullPlataform[Random.Range(0, pullPlataform.Count)];
+                int random = Random.Range(0, pullPlataform.Count);
+                plat = pullPlataform[random];
 
                 if (plat != allPlataforms[0])
                     forceBase = true;
@@ -143,6 +144,7 @@ namespace Game.Loader.Plataform
             bool[] avaibility = new bool[15];
             int count_1 = 0;
             int rand_1 = 0;
+            GameObject curentObject = null;
 
             for (int i = 0; i < 15; i++)
                 avaibility[i] = true;
@@ -153,13 +155,14 @@ namespace Game.Loader.Plataform
                     || (child.subType == PlataformController.SubType.Destructible && !a_Destructibles))
                     continue;
 
+                curentObject = GetObjectByType(child.objectType);
                 rand_1 = Random.Range(1, 101);
 
                 if (rand_1 <= child.probInRow)
                 {
                     rand_1 = Random.Range(1, 101);
                     int temp_sum = 0;
-                    for (int i = 0; i < 5; i++)
+                    for (int i = 0; i < child.probEachRow.Length; i++)
                     {
                         temp_sum += child.probEachRow[i];
 
@@ -188,7 +191,7 @@ namespace Game.Loader.Plataform
 
                                 for (int y = 0; y < 3; y++)
                                 {
-                                    InstanciateAnObject(coinObject, a_Position + new Vector3(temp_array[rand_1] - 2, 0.5f, y - 1));
+                                    InstanciateAnObject(curentObject, a_Position + new Vector3(temp_array[rand_1] - 2, 0.5f, y - 1));
                                     avaibility[(temp_array[rand_1] - 2) + ((y - 1) * 5)] = false;
                                 }
 
@@ -205,18 +208,30 @@ namespace Game.Loader.Plataform
                 {
                     for (int x = 0; x < 5; x++)
                         for (int y = 0; y < 3; y++)
-                            if (avaibility[x + y * 5])
+                            if (avaibility[x + y * 5] && child.spawnsPositions[x + y * 5])
                             {
                                 rand_1 = Random.Range(1, 101);
 
                                 if (rand_1 <= child.probSpawn)
                                 {
-                                    InstanciateAnObject(coinObject, a_Position + new Vector3(x - 2, 0.5f, y - 1));
+                                    InstanciateAnObject(curentObject, a_Position + new Vector3(x - 2, 0.5f, y - 1));
                                     avaibility[x + (y * 5)] = false;
                                 }
                             }
                 }
             }
+        }
+
+        private GameObject GetObjectByType(PlataformController.ObjectType a_ObjType)
+        {
+            if (a_ObjType == PlataformController.ObjectType.Coin)
+                return coinObject;
+            else if (a_ObjType == PlataformController.ObjectType.Bullet)
+                return bulletObject;
+            else if (a_ObjType == PlataformController.ObjectType.Meteoroids)
+                return metereoidObjctes[Random.Range(0, metereoidObjctes.Count)];
+            else
+                return null;
         }
         #endregion objects function
         #endregion methods

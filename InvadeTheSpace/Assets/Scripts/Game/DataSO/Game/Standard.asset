@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fca6cd5777dcfee42a31f64bed0dbcd3, type: 3}
   m_Name: Standard
   m_EditorClassIdentifier: 
-  baseIncrementSpeed: 0.01
+  baseIncrementSpeed: 0.1
   minToUpgradeSpeed: 3
-  maxToUpgradeSpeed: 20
-  percentageBaseDecrement: 0.02
+  maxToUpgradeSpeed: 5
+  percentageBaseDecrement: 0.2

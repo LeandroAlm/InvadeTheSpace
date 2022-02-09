@@ -37,6 +37,9 @@ namespace Game.Controller.UI
         [Tooltip("Menu coins object reference")]
         private GameObject menuCoinGO;
         [SerializeField]
+        [Tooltip("Ship coins object reference")]
+        private GameObject shipCoinGO;
+        [SerializeField]
         [Tooltip("Game coins object reference")]
         private GameObject gameCoinGO;
         [SerializeField]
@@ -187,6 +190,13 @@ namespace Game.Controller.UI
         #endregion SETTINGS
 
         #region SHOP
+        /// <summary>
+        /// On ship click by the menu
+        /// </summary>
+        public void OnShipClick()
+        {
+            shipCoinGO.GetComponent<TextMeshProUGUI>().text = MenuController.settingsController.coins.ToString();
+        }
         #endregion SHOP
 
         #region GAME

@@ -175,7 +175,6 @@ namespace Game.Controller.Player
 
                     if (currentLimitControl >= -2 && currentLimitControl <= 2)
                     {
-                        SetPlayerStatus(playerStatus.Move);
                         StartCoroutine(PlayerMoveOverSpeed(touch.deltaPosition.x > 0 ? 1 : -1));
                     }
                     else
@@ -242,6 +241,7 @@ namespace Game.Controller.Player
             float destiny = transform.position.x + a_direction;
 
             shipGO.GetComponent<Animator>().SetInteger("direction", a_direction);
+            SetPlayerStatus(playerStatus.Move);
 
             while ((a_direction < 0 && transform.position.x > destiny) || (a_direction > 0 && transform.position.x < destiny))
             {

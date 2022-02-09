@@ -22,7 +22,7 @@ public class PlataformController : MonoBehaviour
         Map,
         Coin,
         Bullet,
-        Destructivel
+        Meteoroids
     }
     public enum SubType
     {

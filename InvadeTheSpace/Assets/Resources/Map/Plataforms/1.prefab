@@ -124,7 +124,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   difficulty: 2
-  interactiveObjects: []
+  interactiveObjects:
+  - objectType: 2
+    subType: 0
+    spawnsPositions: 010101000001010000000101010000
+    probSpawn: 12
+    probInRow: 0
+    probEachRow: 
 --- !u!1001 &8734707282066193490
 PrefabInstance:
   m_ObjectHideFlags: 0
